@@ -1660,7 +1660,7 @@ function viewCar(){
   html+='<div class="session-header"><h2>Modo coche</h2><button class="iconbtn" data-action="nav" data-view="dashboard">✕</button></div>';
   html+='<div class="quote-card" style="text-align:left">';
   html+='<p style="margin:0 0 10px;font-weight:700">Pantalla completa, cuatro botones enormes, todo al oído.</p>';
-  html+='<p style="margin:0;color:var(--ink-soft);font-size:.88rem;line-height:1.6">Repasa vocabulario sin mirar la pantalla — ideal para el coche.<br><br>Amarillo: sabida · Negro: repetir · Verde: palabra siguiente · Rojo: a repasar.</p>';
+  html+='<p style="margin:0;color:var(--ink-soft);font-size:.88rem;line-height:1.6">Repasa vocabulario sin mirar la pantalla — ideal para el coche.<br><br>Amarillo: sabida · Negro: respuesta (la frase en español) · Verde: palabra siguiente · Rojo: a repasar.</p>';
   html+='</div>';
   html+='<button class="btn btn-green btn-wide btn-lg" data-action="car-start">Comenzar</button>';
   html+='</main>';
@@ -1680,7 +1680,7 @@ function viewCarDrill(){
     txt+
     '<div class="car-pad">'+
       '<button class="car-btn car-btn-known'+(carS.mark==="known"?' sel':'')+'" data-action="car-known" aria-label="Sabida"><span class="car-ico">✓</span>Connu</button>'+
-      '<button class="car-btn car-btn-repeat" data-action="car-repeat" aria-label="Repetir la frase"><span class="car-ico">↻</span>Répète</button>'+
+      '<button class="car-btn car-btn-repeat" data-action="car-repeat" aria-label="Respuesta en español"><span class="car-ico">🔊</span>Réponse</button>'+
       '<button class="car-btn car-btn-next" data-action="car-next" aria-label="Palabra siguiente"><span class="car-ico">›</span>Suivant</button>'+
       '<button class="car-btn car-btn-review'+(carS.mark==="review"?' sel':'')+'" data-action="car-review" aria-label="A repasar"><span class="car-ico">✕</span>À revoir</button>'+
     '</div>'+
@@ -1703,14 +1703,17 @@ function buildCarDeck(){
   carS.i=0; carS.mark=""; carS.ok=0;
 }
 
+/* La phrase française est lue toute seule ; l'espagnol n'est dit qu'à l'appui sur « Réponse » */
 function carPlay(){
   if(!carS.deck.length) buildCarDeck();
   if(!carS.deck.length) return;
   var w=VOCAB_BY_ID[carS.deck[carS.i]];
-  speakSequence([
-    {text:carClean(w.xfr||w.fr),lang:"fr-FR"},
-    {text:carClean(w.xes||w.es),lang:"es-ES"}
-  ]);
+  speakSequence([{text:carClean(w.xfr||w.fr),lang:"fr-FR"}]);
+}
+function carAnswer(){
+  if(!carS.deck.length) return;
+  var w=VOCAB_BY_ID[carS.deck[carS.i]];
+  speakSequence([{text:carClean(w.xes||w.es),lang:"es-ES"}]);
 }
 
 function carSetMark(m){
@@ -2038,7 +2041,7 @@ document.getElementById("app").addEventListener("click",function(e){
   } else if(action==="car-known"){
     carSetMark("known");
   } else if(action==="car-repeat"){
-    carPlay();
+    carAnswer();
   } else if(action==="car-next"){
     carNext();
   } else if(action==="toggle-sound"){
