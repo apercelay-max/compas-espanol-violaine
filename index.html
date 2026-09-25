@@ -1,0 +1,2148 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Compás</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root{
+  --ink:#171A2C;
+  --ink-soft:#565C77;
+  --ink-faint:#8B8FA6;
+  --paper:#FAF6EF;
+  --surface:#FFFFFF;
+  --surface-2:#F2ECDC;
+  --border:#E5DCC6;
+  /* Rojo y gualda — bandera de España */
+  --yellow:#F1BF00;
+  --yellow-soft:#FCEEB0;
+  --yellow-ink:#5C4300;
+  --red:#C8102E;
+  --red-soft:#FBDADD;
+  --red-ink:#7A1220;
+  /* Verde y blanco — bandera de Andalucía */
+  --green:#1C8A4B;
+  --green-bright:#4CC98A;
+  --green-glow:rgba(28,138,75,.35);
+  --green-soft:#DCF3E4;
+  --green-ink:#0F4A29;
+  --focus:var(--green);
+  --surface-a:rgba(255,255,255,.92);
+  --shadow:0 1px 2px rgba(23,26,44,.04), 0 8px 24px -12px rgba(23,26,44,.18);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#F1EDE2;
+    --ink-soft:#B7BCD4;
+    --ink-faint:#7C81A0;
+    --paper:#12141F;
+    --surface:#1B1E2C;
+    --surface-2:#242739;
+    --border:#333752;
+    --yellow:#FFD23F;
+    --yellow-soft:#3D2E00;
+    --yellow-ink:#FFE9A8;
+    --red:#FF6B5E;
+    --red-soft:#3A1613;
+    --red-ink:#FFC6BE;
+    --green:#4CC98A;
+    --green-bright:#8FE8B8;
+    --green-glow:rgba(76,201,138,.45);
+    --green-soft:#123420;
+    --green-ink:#B7EACB;
+    --surface-a:rgba(27,30,44,.9);
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 28px -12px rgba(0,0,0,.55);
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#F1EDE2;
+  --ink-soft:#B7BCD4;
+  --ink-faint:#7C81A0;
+  --paper:#12141F;
+  --surface:#1B1E2C;
+  --surface-2:#242739;
+  --border:#333752;
+  --yellow:#FFD23F;
+  --yellow-soft:#3D2E00;
+  --yellow-ink:#FFE9A8;
+  --red:#FF6B5E;
+  --red-soft:#3A1613;
+  --red-ink:#FFC6BE;
+  --green:#4CC98A;
+  --green-bright:#8FE8B8;
+  --green-glow:rgba(76,201,138,.45);
+  --green-soft:#123420;
+  --green-ink:#B7EACB;
+  --surface-a:rgba(27,30,44,.9);
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 28px -12px rgba(0,0,0,.55);
+}
+
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Manrope',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background-image:
+    radial-gradient(600px 400px at 15% -5%, var(--yellow-soft), transparent),
+    radial-gradient(500px 400px at 100% 10%, var(--green-soft), transparent);
+  background-attachment:fixed;
+}
+h1,h2,h3,.display{font-family:'Fraunces',Georgia,serif; text-wrap:balance;}
+button{font-family:inherit;}
+:focus-visible{outline:2px solid var(--focus); outline-offset:2px; border-radius:6px;}
+::selection{background:var(--yellow-soft); color:var(--yellow-ink);}
+
+.app-shell{
+  max-width:472px;
+  margin:0 auto;
+  min-height:100dvh;
+  background:var(--surface);
+  box-shadow:var(--shadow);
+  display:flex;
+  flex-direction:column;
+  position:relative;
+}
+@media (min-width:560px){
+  body{padding:28px 12px;}
+  .app-shell{min-height:calc(100dvh - 56px); border-radius:28px; overflow:hidden; border:1px solid var(--border);}
+}
+
+/* ---------- Header ---------- */
+.topbar{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:18px 20px 14px;
+  border-bottom:1px solid var(--border);
+  position:sticky; top:0; z-index:5;
+  background:var(--surface-a);
+  backdrop-filter:blur(6px);
+}
+.wordmark{font-family:'Fraunces',serif; font-weight:600; font-size:1.3rem; letter-spacing:-.01em; margin:0; display:flex; align-items:baseline; gap:2px;}
+.wordmark .accent-dot{color:var(--green); font-size:1rem;}
+.topbar-meta{display:flex; align-items:center; gap:10px;}
+.pill{
+  display:inline-flex; align-items:center; gap:5px;
+  font-size:.78rem; font-weight:700; padding:5px 10px 5px 9px; border-radius:999px;
+  font-variant-numeric:tabular-nums;
+}
+.pill-level{background:var(--yellow-soft); color:var(--yellow-ink);}
+.pill-streak{background:var(--red-soft); color:var(--red-ink);}
+
+.main{flex:1; padding:20px 20px 12px; overflow-x:hidden;}
+
+/* ---------- Bottom nav ---------- */
+.bottomnav{
+  display:flex; border-top:1px solid var(--border);
+  position:sticky; bottom:0; background:var(--surface); z-index:5;
+}
+.navbtn{
+  flex:1; background:none; border:none; padding:12px 4px 14px; cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  color:var(--ink-faint); font-size:.72rem; font-weight:700; letter-spacing:.01em;
+  border-top:2px solid transparent; transition:color .15s;
+}
+.navbtn .dot{width:6px; height:6px; border-radius:50%; background:currentColor; opacity:0;}
+.navbtn.active{color:var(--green); border-top-color:var(--green);}
+.navbtn.active .dot{opacity:1;}
+.navbtn:hover{color:var(--ink-soft);}
+.navbtn.active:hover{color:var(--green);}
+
+/* ---------- Dashboard ---------- */
+.hero-card{
+  background:linear-gradient(155deg, var(--surface-2), var(--surface));
+  border:1px solid var(--border); border-radius:20px; padding:20px;
+  margin-bottom:20px;
+}
+.hero-top{display:flex; justify-content:space-between; align-items:flex-start; gap:12px;}
+.hero-greet{margin:0 0 2px; font-size:1.3rem; font-weight:600;}
+.hero-sub{margin:0; color:var(--ink-soft); font-size:.88rem;}
+.prog-row{margin-top:16px;}
+.prog-labels{display:flex; justify-content:space-between; gap:10px; font-size:.76rem; color:var(--ink-soft); margin-bottom:6px; font-weight:600;}
+.prog-labels span:last-child{font-variant-numeric:tabular-nums; white-space:nowrap;}
+.prog-track{height:8px; border-radius:999px; background:var(--border); overflow:hidden;}
+.prog-fill{height:100%; border-radius:999px; background:linear-gradient(90deg, var(--yellow), var(--red)); transition:width .5s ease;}
+.prog-note{margin:8px 0 0; font-size:.76rem; color:var(--ink-faint); line-height:1.4;}
+
+.day-banner{
+  display:flex; align-items:center; gap:10px;
+  background:var(--green-soft); color:var(--green-ink); border-radius:14px;
+  padding:12px 14px; margin-bottom:16px; font-size:.85rem; font-weight:600;
+}
+
+.session-list{display:flex; flex-direction:column; gap:12px; margin-bottom:20px;}
+.session-card{
+  display:flex; align-items:center; gap:14px;
+  border:1px solid var(--border); border-radius:16px; padding:14px 16px;
+  background:var(--surface); position:relative; overflow:hidden;
+}
+.session-card::before{content:""; position:absolute; left:0; top:0; bottom:0; width:5px;}
+.session-card.c-vocab::before{background:var(--yellow);}
+.session-card.c-grammar::before{background:var(--ink-soft);}
+.session-body{flex:1; min-width:0;}
+.session-title{font-weight:700; font-size:1rem; margin:0 0 2px;}
+.session-desc{margin:0; font-size:.8rem; color:var(--ink-soft); line-height:1.4;}
+.session-tag{font-size:.68rem; color:var(--ink-faint); font-weight:700; text-transform:uppercase; letter-spacing:.05em; margin-top:6px; display:block;}
+.btn{
+  appearance:none; border:none; cursor:pointer; border-radius:12px;
+  font-weight:700; font-size:.86rem; padding:10px 16px;
+  transition:transform .1s, filter .15s; white-space:nowrap;
+}
+.btn:active{transform:scale(.97);}
+.btn-yellow{background:var(--yellow); color:#211405;}
+.btn-green{background:var(--green); color:#06201d;}
+.btn-ghost{background:var(--surface-2); color:var(--ink);}
+.btn-outline{background:transparent; border:1.5px solid var(--border); color:var(--ink-soft);}
+.btn-wide{width:100%;}
+.btn-lg{padding:14px 18px; font-size:.95rem; border-radius:14px;}
+.btn[disabled]{opacity:.5; cursor:default;}
+.check-badge{display:flex; align-items:center; gap:6px; color:var(--green); font-weight:700; font-size:.82rem; white-space:nowrap;}
+
+.quote-card{
+  border:1px dashed var(--border); border-radius:16px; padding:16px 18px; text-align:center;
+}
+.quote-es{font-family:'Fraunces',serif; font-style:italic; font-size:1.05rem; margin:0 0 4px;}
+.quote-fr{font-size:.78rem; color:var(--ink-faint); margin:0;}
+
+/* ---------- Session header ---------- */
+.session-header{display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;}
+.session-header h2{margin:0; font-size:1.15rem;}
+.iconbtn{
+  width:34px; height:34px; border-radius:50%; border:1px solid var(--border); background:var(--surface);
+  display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--ink-soft); font-size:1rem;
+}
+.progress-strip{height:6px; background:var(--border); border-radius:999px; overflow:hidden; margin-bottom:22px;}
+.progress-strip > div{height:100%; border-radius:999px; transition:width .3s ease;}
+.vocab-meta{display:flex; justify-content:space-between; gap:6px; margin-bottom:18px; padding:12px 6px; border:1px solid var(--border); border-radius:14px; background:var(--surface-2);}
+.vm-item{display:flex; flex-direction:column; align-items:center; flex:1; min-width:0;}
+.vm-num{font-family:'JetBrains Mono',monospace; font-weight:700; font-size:1.1rem; font-variant-numeric:tabular-nums; color:var(--ink);}
+.vm-label{font-size:.6rem; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin-top:3px; text-align:center;}
+
+/* ---------- Flashcard (volteo 3D) ---------- */
+.flashcard-wrap{display:flex; flex-direction:column; align-items:center; gap:22px; padding-top:6px;}
+.flashcard{width:100%; min-height:296px; cursor:pointer; position:relative; perspective:1400px;}
+.flip-inner{
+  position:relative; width:100%; height:100%; min-height:296px;
+  transition:transform .5s cubic-bezier(.4,0,.2,1); transform-style:preserve-3d;
+}
+.flashcard.flipped .flip-inner{transform:rotateY(180deg);}
+.flip-face{
+  position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden;
+  border-radius:22px; border:1px solid var(--border);
+  background:linear-gradient(160deg, var(--surface-2), var(--surface));
+  display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
+  /* marge haute : laisse passer le bouton 🔊 sans chevaucher l'étiquette de thème */
+  padding:56px 20px 24px; gap:10px; overflow-y:auto;
+}
+.flip-back{transform:rotateY(180deg); pointer-events:none;}
+.flashcard.flipped .flip-front{pointer-events:none;}
+.flashcard.flipped .flip-back{pointer-events:auto;}
+@media (prefers-reduced-motion: reduce){ .flip-inner{transition:none;} }
+.speak-btn{
+  position:absolute; top:14px; right:14px; width:38px; height:38px; border-radius:50%;
+  border:1px solid var(--border); background:var(--surface); color:var(--green);
+  font-size:1.05rem; display:flex; align-items:center; justify-content:center; cursor:pointer;
+}
+.speak-btn:hover{border-color:var(--green);}
+.fav-btn{
+  position:absolute; top:14px; left:14px; width:38px; height:38px; border-radius:50%;
+  border:1px solid var(--border); background:var(--surface); color:var(--ink-faint);
+  font-size:1.15rem; display:flex; align-items:center; justify-content:center; cursor:pointer;
+}
+.fav-btn:hover{border-color:var(--yellow);}
+.fav-btn.active{color:var(--yellow-ink); background:var(--yellow-soft); border-color:var(--yellow);}
+.flashcard .theme-tag{font-size:.7rem; text-transform:uppercase; letter-spacing:.07em; color:var(--yellow-ink); background:var(--yellow-soft); padding:2px 8px; border-radius:999px; font-weight:800;}
+.flashcard .side-tag{font-size:.64rem; text-transform:uppercase; letter-spacing:.12em; font-weight:800; color:var(--ink-faint); margin:0;}
+/* Recto : le mot à deviner, en français */
+.flashcard .prompt-word{font-size:1.8rem; font-weight:800; letter-spacing:-.01em; line-height:1.2; margin:2px 0;}
+.flashcard .prompt-word.arrive{animation:wordArrive .5s cubic-bezier(.2,.8,.3,1.2) both;}
+@keyframes wordArrive{ from{opacity:0; transform:translateY(12px) scale(.94);} to{opacity:1; transform:translateY(0) scale(1);} }
+@media (prefers-reduced-motion: reduce){ .flashcard .prompt-word.arrive{animation:none;} }
+/* Verso : la réponse, en espagnol */
+.flashcard .answer-word{font-family:'Fraunces',serif; font-weight:600; font-size:2rem; line-height:1.2; margin:2px 0; color:var(--green-ink);}
+.flashcard .echo-word{font-size:.98rem; color:var(--ink-faint); font-weight:600; margin:0;}
+.flashcard .example{margin-top:10px; font-size:.85rem; color:var(--ink-soft); line-height:1.5;}
+.flashcard .hint{font-size:.78rem; color:var(--ink-faint); margin-top:4px;}
+.flashcard kbd{margin:0 .15em;}
+.rate-row{display:flex; gap:12px; width:100%;}
+.rate-row .btn{flex:1;}
+
+/* ---------- Grammar ---------- */
+.lesson-panel{background:var(--surface-2); border-radius:18px; padding:18px 18px 16px; margin-bottom:18px; border:1px solid var(--border);}
+.lesson-panel h3{margin:0 0 8px; font-size:1.05rem;}
+.lesson-panel p{margin:0 0 10px; font-size:.9rem; line-height:1.6; color:var(--ink-soft);}
+.lesson-panel p:last-child{margin-bottom:0;}
+.lesson-panel table{width:100%; border-collapse:collapse; margin:10px 0; font-size:.85rem;}
+.lesson-panel td{padding:5px 6px; border-bottom:1px solid var(--border);}
+.lesson-panel td:first-child{color:var(--ink-faint); font-weight:600;}
+.exercise-card{border:1px solid var(--border); border-radius:18px; padding:18px; background:var(--surface);}
+.ex-count{font-size:.72rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:8px; display:block;}
+.ex-prompt{font-size:1.05rem; font-weight:600; margin:0 0 16px; line-height:1.5;}
+.ex-prompt em{color:var(--yellow-ink); font-style:normal; border-bottom:2px solid var(--yellow); background:var(--yellow-soft); padding:0 3px; border-radius:4px;}
+.opt-list{display:flex; flex-direction:column; gap:9px;}
+.opt-btn{
+  text-align:left; border:1.5px solid var(--border); background:var(--surface); border-radius:12px;
+  padding:11px 14px; font-size:.92rem; font-weight:600; cursor:pointer; color:var(--ink);
+}
+.opt-btn:hover{border-color:var(--green);}
+.opt-btn.correct{border-color:var(--green); background:var(--green-soft); color:var(--green-ink);}
+.opt-btn.wrong{border-color:var(--red); background:var(--red-soft); color:var(--red-ink);}
+.opt-btn[disabled]{cursor:default;}
+.fill-row{display:flex; gap:10px;}
+.fill-input{
+  flex:1; border:1.5px solid var(--border); border-radius:12px; padding:11px 14px;
+  font-size:.95rem; font-family:inherit; background:var(--surface); color:var(--ink);
+}
+.fill-input:focus{border-color:var(--green);}
+.fill-input.correct{border-color:var(--green); background:var(--green-soft);}
+.fill-input.wrong{border-color:var(--red); background:var(--red-soft);}
+.fill-input.near{border-color:var(--yellow); background:var(--yellow-soft);}
+.feedback{margin-top:14px; padding:12px 14px; border-radius:12px; font-size:.86rem; line-height:1.5;}
+.feedback.ok{background:var(--green-soft); color:var(--green-ink);}
+.feedback.ko{background:var(--red-soft); color:var(--red-ink);}
+.feedback.near{background:var(--yellow-soft); color:var(--yellow-ink);}
+.feedback b{font-weight:800;}
+
+/* ---------- Modo coche ---------- */
+.car-overlay{position:fixed; inset:0; z-index:50; display:flex; flex-direction:column; background:#0a0a0a;}
+.car-exit{
+  position:absolute; top:14px; right:14px; z-index:10;
+  width:44px; height:44px; border-radius:50%; border:none;
+  background:rgba(255,255,255,.1); color:#9497ab;
+  display:flex; align-items:center; justify-content:center; font-size:1.05rem; cursor:pointer;
+}
+.car-overlay{background:radial-gradient(120% 80% at 50% 0%, #1a1c2a 0%, #0a0a0f 70%);}
+.car-text{flex:0 1 auto; padding:max(58px,calc(env(safe-area-inset-top) + 40px)) 34px 14px; text-align:center; display:flex; flex-direction:column; gap:14px; overflow:auto; min-height:0; max-height:44%;}
+.car-text .car-fr{font-size:clamp(1.35rem,5.6vw,2.1rem); font-weight:700; line-height:1.22; color:#aeb2c8;}
+.car-text .car-es{font-family:'Fraunces',Georgia,serif; font-size:clamp(1.8rem,8vw,3.1rem); font-weight:600; line-height:1.15; color:#fff;}
+.car-pad{flex:1; min-height:0; display:flex; flex-direction:column; gap:14px; padding:6px 38px max(34px,calc(env(safe-area-inset-bottom) + 26px));}
+.car-btn{
+  flex:1; min-height:0; border:none; cursor:pointer; -webkit-tap-highlight-color:transparent;
+  border-radius:26px; display:flex; align-items:center; justify-content:center; gap:14px;
+  font-family:inherit; font-size:1.25rem; font-weight:800; letter-spacing:.02em;
+  box-shadow:0 10px 24px -10px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.22), inset 0 -3px 0 rgba(0,0,0,.18);
+  transition:transform .08s, box-shadow .12s;
+}
+.car-btn .car-ico{font-size:1.6rem; line-height:1;}
+.car-btn:active{transform:scale(.97);}
+.car-btn.sel{box-shadow:0 0 0 4px rgba(255,255,255,.92), 0 10px 24px -10px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.22);}
+.car-btn-known{background:linear-gradient(160deg,#FFD23F,#F1BF00); color:#3a2a00;}
+.car-btn-repeat{background:linear-gradient(160deg,#2a2c3a,#0d0d12); color:#e8e9f2; border:1.5px solid rgba(255,255,255,.14);}
+.car-btn-next{background:linear-gradient(160deg,#1C8A4B,#0F4A29); color:#eafff2;}
+.car-btn-review{background:linear-gradient(160deg,#E0233F,#C8102E); color:#fff;}
+
+/* ---------- Completion ---------- */
+.done-wrap{display:flex; flex-direction:column; align-items:center; text-align:center; padding:30px 8px;}
+.done-badge{
+  width:78px; height:78px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-size:2.1rem; margin-bottom:18px;
+}
+.done-wrap h2{margin:0 0 6px;}
+.done-wrap p{color:var(--ink-soft); margin:0 0 22px; font-size:.9rem;}
+.done-note{font-size:.76rem !important; color:var(--ink-faint) !important; margin:-12px 0 20px !important; line-height:1.5; max-width:300px;}
+.done-levelup{color:var(--green-ink) !important; background:var(--green-soft); border-radius:12px; padding:10px 14px; font-weight:700; margin:0 0 16px !important;}
+.gain-chip{display:inline-flex; align-items:center; gap:6px; background:var(--yellow-soft); color:var(--yellow-ink); font-weight:800; font-size:.85rem; padding:7px 14px; border-radius:999px; margin-bottom:22px;}
+
+/* ---------- Vocabulario : situations de la vie quotidienne ---------- */
+.sec-intro{font-size:.85rem; color:var(--ink-soft); line-height:1.5; margin:0 0 14px;}
+.sec-hint{font-size:.76rem; color:var(--ink-faint); margin:10px 0 0; text-align:center; font-variant-numeric:tabular-nums;}
+.sec-list{display:flex; flex-direction:column; gap:8px;}
+.sec-btn{
+  display:flex; align-items:center; gap:12px; width:100%; text-align:left;
+  border:1px solid var(--border); border-radius:14px; padding:11px 14px;
+  background:var(--surface); color:var(--ink); cursor:pointer; font-family:inherit;
+}
+.sec-btn:hover{border-color:var(--green);}
+.sec-btn:active{transform:scale(.99);}
+.sec-btn.done{background:var(--green-soft); border-color:var(--green);}
+.sec-emoji{font-size:1.2rem; flex:none; width:24px; text-align:center; line-height:1;}
+.sec-body{flex:1; min-width:0;}
+.sec-name{display:block; font-weight:700; font-size:.9rem; line-height:1.3;}
+.sec-bar{display:block; height:5px; border-radius:999px; background:var(--border); overflow:hidden; margin-top:6px;}
+.sec-bar > i{display:block; height:100%; background:var(--yellow); border-radius:999px;}
+.sec-btn.done .sec-bar > i{background:var(--green);}
+.sec-count{flex:none; font-family:'JetBrains Mono',monospace; font-size:.76rem; color:var(--ink-soft); font-variant-numeric:tabular-nums;}
+
+/* ---------- Stats ---------- */
+.stat-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;}
+.stat-tile{border:1px solid var(--border); border-radius:16px; padding:16px; background:var(--surface-2);}
+.stat-num{font-family:'JetBrains Mono',monospace; font-size:1.7rem; font-weight:700; font-variant-numeric:tabular-nums; display:block;}
+.stat-label{font-size:.76rem; color:var(--ink-soft); font-weight:600;}
+.theme-progress{display:flex; flex-direction:column; gap:10px;}
+.tp-row{display:flex; align-items:center; gap:10px;}
+.tp-name{flex:0 0 150px; font-size:.8rem; color:var(--ink-soft); font-weight:600; line-height:1.3;}
+.tp-track{flex:1; height:7px; background:var(--border); border-radius:999px; overflow:hidden;}
+.tp-fill{height:100%; background:var(--yellow); border-radius:999px;}
+.tp-count{flex:0 0 42px; text-align:right; font-size:.76rem; color:var(--ink-faint); font-variant-numeric:tabular-nums;}
+.section-label{font-size:.72rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-faint); margin:22px 0 10px;}
+.section-label:first-child{margin-top:0;}
+
+/* ---------- Settings ---------- */
+.settings-group{border:1px solid var(--border); border-radius:16px; overflow:hidden; margin-bottom:18px;}
+.settings-row{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px; border-bottom:1px solid var(--border);}
+.settings-row:last-child{border-bottom:none;}
+.settings-row .label{font-weight:700; font-size:.92rem;}
+.settings-row .desc{font-size:.78rem; color:var(--ink-soft); margin-top:2px;}
+.switch{width:44px; height:26px; border-radius:999px; background:var(--border); position:relative; cursor:pointer; border:none; flex:none;}
+.switch.on{background:var(--green);}
+.switch::after{content:""; position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:#fff; transition:left .15s;}
+.switch.on::after{left:21px;}
+.level-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.level-btn{border:1.5px solid var(--border); border-radius:12px; padding:12px; text-align:left; background:var(--surface); cursor:pointer;}
+.level-btn.active{border-color:var(--yellow); background:var(--yellow-soft);}
+.level-btn b{display:block; font-size:.95rem;}
+.level-btn span{font-size:.75rem; color:var(--ink-soft);}
+
+/* ---------- Onboarding ---------- */
+.onb-wrap{padding:30px 22px; min-height:100dvh; display:flex; flex-direction:column;}
+.onb-mark{font-family:'Fraunces',serif; font-weight:700; font-size:2rem; margin:0 0 6px;}
+.onb-tag{color:var(--ink-soft); font-size:.95rem; margin:0 0 30px; line-height:1.5;}
+.onb-feature{display:flex; gap:12px; align-items:flex-start; margin-bottom:16px;}
+.onb-dot{width:8px; height:8px; border-radius:50%; margin-top:7px; flex:none;}
+.onb-feature b{display:block; font-size:.92rem;}
+.onb-feature span{font-size:.82rem; color:var(--ink-soft);}
+.onb-choices{margin-top:auto; padding-top:26px;}
+.sync-note{display:flex; align-items:center; gap:8px; font-size:.75rem; color:var(--ink-faint); margin-top:14px; justify-content:center;}
+.sync-dot{width:7px; height:7px; border-radius:50%; background:var(--green);}
+
+/* ---------- Franja bandera (acento de marca) ---------- */
+.flag-stripe{display:flex; height:4px; border-radius:999px; overflow:hidden; width:52px;}
+.flag-stripe span{flex:1;}
+.flag-stripe .r1,.flag-stripe .r2{background:var(--red);}
+.flag-stripe .y{background:var(--yellow);}
+.flag-stripe.andalucia .g1,.flag-stripe.andalucia .g2{background:var(--green);}
+.flag-stripe.andalucia .w{background:#fff;}
+
+/* ---------- Atajos de teclado ---------- */
+kbd{
+  font-family:'JetBrains Mono',monospace; font-size:.72rem; color:var(--ink-soft);
+  background:var(--surface-2); border:1px solid var(--border); border-bottom-width:2px;
+  border-radius:5px; padding:.08em .42em;
+}
+.kbd-hint{font-size:.74rem; color:var(--ink-faint); margin-top:2px; text-align:center;}
+
+/* ---------- Récapitulatif de fin de séance ---------- */
+.recap{width:100%; text-align:left; margin:2px 0 22px; border-top:1px solid var(--border);}
+.recap-title{font-size:.72rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-faint); margin:16px 0 4px;}
+.recap-item{display:flex; gap:10px; padding:10px 2px; border-bottom:1px solid var(--border); align-items:flex-start;}
+.recap-mark{width:1.5rem; flex:none; font-weight:800; font-size:.85rem; line-height:1.4;}
+.recap-mark.bad{color:var(--red);}
+.recap-mark.near{color:var(--yellow-ink);}
+.recap-body{flex:1; min-width:0; font-size:.85rem; line-height:1.5; color:var(--ink-soft);}
+.recap-body b{color:var(--ink); font-weight:700;}
+.recap-you{color:var(--red-ink); font-weight:600;}
+.recap-you.near{color:var(--yellow-ink);}
+
+@media (max-width:360px){
+  .flashcard .prompt-word,
+  .flashcard .answer-word{font-size:1.5rem;}
+}
+</style>
+
+<div id="app"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   ICÔNE « Ajouter à l'écran d'accueil » (iOS Safari)
+   Safari ne lit pas le favicon pour l'icône d'accueil : il lui
+   faut un <link rel="apple-touch-icon"> explicite dans <head>,
+   injecté ici au runtime puisque le <head> de la page est généré
+   par la plateforme d'artefacts (hors du contenu publié).
+   ============================================================ */
+(function setupHomeScreenIcon(){
+  var ICON="data:image/png;base64,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";
+  function addLink(rel, href){
+    var l=document.createElement("link");
+    l.setAttribute("rel", rel);
+    l.setAttribute("href", href);
+    document.head.appendChild(l);
+  }
+  function addMeta(name, content){
+    var m=document.createElement("meta");
+    m.setAttribute("name", name);
+    m.setAttribute("content", content);
+    document.head.appendChild(m);
+  }
+  addLink("apple-touch-icon", ICON);
+  addLink("icon", ICON);
+  addMeta("apple-mobile-web-app-capable", "yes");
+  addMeta("apple-mobile-web-app-status-bar-style", "black-translucent");
+  addMeta("apple-mobile-web-app-title", "Compás");
+  addMeta("theme-color", "#F1BF00");
+})();
+
+/* ============================================================
+   DONNÉES — Vocabulaire
+   ============================================================ */
+var VOCAB = [
+{id:"v330",lvl:"B1",th:"Banque & paperasses",es:"la cuenta bancaria",fr:"le compte bancaire",xes:"Quiero abrir una cuenta bancaria.",xfr:"Je veux ouvrir un compte bancaire."},
+{id:"v331",lvl:"B1",th:"Banque & paperasses",es:"la transferencia",fr:"le virement",xes:"Le hago una transferencia mañana.",xfr:"Je vous fais un virement demain."},
+{id:"v332",lvl:"B1",th:"Banque & paperasses",es:"el recibo",fr:"le prélèvement / le reçu",xes:"El recibo de la luz se paga cada mes.",xfr:"Le prélèvement de l'électricité se paie chaque mois."},
+{id:"v333",lvl:"B1",th:"Banque & paperasses",es:"el trámite",fr:"la démarche",xes:"Es un trámite de diez minutos.",xfr:"C'est une démarche de dix minutes."},
+{id:"v334",lvl:"B1",th:"Banque & paperasses",es:"rellenar un formulario",fr:"remplir un formulaire",xes:"Rellene este formulario y firme abajo.",xfr:"Remplissez ce formulaire et signez en bas."},
+{id:"v335",lvl:"B1",th:"Banque & paperasses",es:"el plazo",fr:"le délai",xes:"El plazo termina el día treinta.",xfr:"Le délai expire le trente."},
+// --- Chez le garagiste (B1) ---
+{id:"v336",lvl:"B1",th:"Chez le garagiste",es:"el taller",fr:"le garage (atelier)",xes:"He llevado el coche al taller.",xfr:"J'ai emmené la voiture au garage."},
+{id:"v337",lvl:"B1",th:"Chez le garagiste",es:"el mecánico",fr:"le mécanicien",xes:"El mecánico ha revisado el motor.",xfr:"Le mécanicien a vérifié le moteur."},
+{id:"v338",lvl:"B1",th:"Chez le garagiste",es:"la avería",fr:"la panne",xes:"Tuvimos una avería en la autopista.",xfr:"Nous avons eu une panne sur l'autoroute."},
+{id:"v339",lvl:"B1",th:"Chez le garagiste",es:"averiarse",fr:"tomber en panne",xes:"El coche se averió a mitad de camino.",xfr:"La voiture est tombée en panne à mi-chemin."},
+{id:"v340",lvl:"B1",th:"Chez le garagiste",es:"el motor",fr:"le moteur",xes:"El motor hace un ruido raro.",xfr:"Le moteur fait un bruit bizarre."},
+{id:"v341",lvl:"B1",th:"Chez le garagiste",es:"los frenos",fr:"les freins",xes:"Los frenos chirrían al frenar.",xfr:"Les freins grincent au freinage."},
+{id:"v342",lvl:"B1",th:"Chez le garagiste",es:"la rueda",fr:"la roue",xes:"Hay que cambiar la rueda delantera.",xfr:"Il faut changer la roue avant."},
+{id:"v343",lvl:"B1",th:"Chez le garagiste",es:"el neumático",fr:"le pneu",xes:"Los neumáticos están muy gastados.",xfr:"Les pneus sont très usés."},
+{id:"v344",lvl:"B1",th:"Chez le garagiste",es:"el pinchazo",fr:"la crevaison",xes:"He tenido un pinchazo cerca de casa.",xfr:"J'ai eu une crevaison près de chez moi."},
+{id:"v345",lvl:"B1",th:"Chez le garagiste",es:"la batería",fr:"la batterie",xes:"La batería se ha descargado.",xfr:"La batterie s'est déchargée."},
+{id:"v346",lvl:"B1",th:"Chez le garagiste",es:"el aceite",fr:"l'huile",xes:"Toca cambiar el aceite.",xfr:"C'est le moment de changer l'huile."},
+{id:"v347",lvl:"B1",th:"Chez le garagiste",es:"la revisión",fr:"la révision",xes:"El coche pasa la revisión cada año.",xfr:"La voiture passe la révision chaque année."},
+{id:"v348",lvl:"B1",th:"Chez le garagiste",es:"el presupuesto de reparación",fr:"le devis",xes:"¿Me puede hacer un presupuesto de reparación?",xfr:"Vous pouvez me faire un devis ?"},
+{id:"v349",lvl:"B1",th:"Chez le garagiste",es:"la pieza de repuesto",fr:"la pièce de rechange",xes:"Falta una pieza de repuesto y tardará dos días.",xfr:"Il manque une pièce de rechange, ça prendra deux jours."},
+// --- Contrôle de police (B1) ---
+{id:"v350",lvl:"B1",th:"Contrôle de police",es:"el control de policía",fr:"le contrôle de police",xes:"Hay un control de policía a la salida del pueblo.",xfr:"Il y a un contrôle de police à la sortie du village."},
+{id:"v351",lvl:"B1",th:"Contrôle de police",es:"la Guardia Civil",fr:"la gendarmerie",xes:"La Guardia Civil vigila la carretera.",xfr:"La gendarmerie surveille la route."},
+{id:"v352",lvl:"B1",th:"Contrôle de police",es:"dar el alto",fr:"faire signe de s'arrêter",xes:"Nos dieron el alto en un cruce.",xfr:"Ils nous ont fait signe de nous arrêter à un croisement."},
+{id:"v353",lvl:"B1",th:"Contrôle de police",es:"la documentación",fr:"les papiers",xes:"Documentación y permiso, por favor.",xfr:"Papiers et permis, s'il vous plaît."},
+{id:"v354",lvl:"B1",th:"Contrôle de police",es:"el agente",fr:"l'agent",xes:"El agente me pidió el carné.",xfr:"L'agent m'a demandé le permis."},
+{id:"v355",lvl:"B1",th:"Contrôle de police",es:"la multa",fr:"l'amende",xes:"Me han puesto una multa de cien euros.",xfr:"J'ai eu une amende de cent euros."},
+{id:"v356",lvl:"B1",th:"Contrôle de police",es:"el seguro",fr:"l'assurance",xes:"El seguro del coche está en la guantera.",xfr:"L'assurance de la voiture est dans la boîte à gants."},
+{id:"v357",lvl:"B1",th:"Contrôle de police",es:"la ITV",fr:"le contrôle technique",xes:"La ITV caduca el mes que viene.",xfr:"Le contrôle technique expire le mois prochain."},
+{id:"v358",lvl:"B1",th:"Contrôle de police",es:"el alcoholímetro",fr:"l'éthylotest",xes:"Tuve que soplar en el alcoholímetro.",xfr:"J'ai dû souffler dans l'éthylotest."},
+{id:"v359",lvl:"B1",th:"Contrôle de police",es:"la infracción",fr:"l'infraction",xes:"Es una infracción leve.",xfr:"C'est une infraction légère."},
+{id:"v360",lvl:"B1",th:"Contrôle de police",es:"retirar el carné",fr:"retirer le permis",xes:"Le pueden retirar el carné por exceso de velocidad.",xfr:"On peut lui retirer le permis pour excès de vitesse."},
+{id:"v361",lvl:"B1",th:"Contrôle de police",es:"la denuncia",fr:"le procès-verbal",xes:"Firmé la denuncia sin discutir.",xfr:"J'ai signé le procès-verbal sans discuter."},
+{id:"v362",lvl:"B1",th:"Contrôle de police",es:"¿algún problema, agente?",fr:"un problème, monsieur l'agent ?",xes:"Buenas tardes, ¿algún problema, agente?",xfr:"Bonsoir, un problème, monsieur l'agent ?"},
+// --- Avis & émotions (B1) ---
+{id:"v143",lvl:"B1",th:"Avis & émotions",es:"feliz",fr:"heureux",xes:"Me siento muy feliz hoy.",xfr:"Je me sens très heureux aujourd'hui."},
+{id:"v144",lvl:"B1",th:"Avis & émotions",es:"triste",fr:"triste",xes:"Está triste porque su amigo se fue.",xfr:"Il est triste parce que son ami est parti."},
+{id:"v145",lvl:"B1",th:"Avis & émotions",es:"enfadado",fr:"en colère",xes:"Mi hermano está enfadado conmigo.",xfr:"Mon frère est en colère contre moi."},
+{id:"v146",lvl:"B1",th:"Avis & émotions",es:"sorprendido",fr:"surpris",xes:"Me quedé sorprendido con la noticia.",xfr:"J'ai été surpris par la nouvelle."},
+{id:"v147",lvl:"B1",th:"Avis & émotions",es:"orgulloso",fr:"fier",xes:"Estoy orgulloso de mi hija.",xfr:"Je suis fier de ma fille."},
+{id:"v148",lvl:"B1",th:"Avis & émotions",es:"preocupado",fr:"inquiet",xes:"Está preocupado por el examen.",xfr:"Il est inquiet à cause de l'examen."},
+{id:"v149",lvl:"B1",th:"Avis & émotions",es:"creo que",fr:"je pense que",xes:"Creo que tienes razón.",xfr:"Je pense que tu as raison."},
+{id:"v150",lvl:"B1",th:"Avis & émotions",es:"me parece que",fr:"il me semble que",xes:"Me parece que va a llover.",xfr:"Il me semble qu'il va pleuvoir."},
+{id:"v151",lvl:"B1",th:"Avis & émotions",es:"estoy de acuerdo",fr:"je suis d'accord",xes:"Estoy de acuerdo con tu idea.",xfr:"Je suis d'accord avec ton idée."},
+{id:"v152",lvl:"B1",th:"Avis & émotions",es:"no estoy de acuerdo",fr:"je ne suis pas d'accord",xes:"No estoy de acuerdo con esa decisión.",xfr:"Je ne suis pas d'accord avec cette décision."},
+{id:"v153",lvl:"B1",th:"Avis & émotions",es:"depende",fr:"ça dépend",xes:"¿Vienes mañana? Depende del tiempo.",xfr:"Tu viens demain ? Ça dépend du temps."},
+{id:"v154",lvl:"B1",th:"Avis & émotions",es:"sin duda",fr:"sans aucun doute",xes:"Sin duda, es la mejor solución.",xfr:"Sans aucun doute, c'est la meilleure solution."},
+// --- Voisins, amis & vie sociale (B1) ---
+{id:"v175",lvl:"B1",th:"Voisins & amis",es:"la pareja",fr:"le couple",xes:"Forman una pareja muy feliz.",xfr:"Ils forment un couple très heureux."},
+{id:"v176",lvl:"B1",th:"Voisins & amis",es:"la confianza",fr:"la confiance",xes:"Necesitamos confianza para trabajar juntos.",xfr:"Nous avons besoin de confiance pour travailler ensemble."},
+{id:"v177",lvl:"B1",th:"Voisins & amis",es:"el respeto",fr:"le respect",xes:"El respeto es la base de la amistad.",xfr:"Le respect est la base de l'amitié."},
+{id:"v178",lvl:"B1",th:"Voisins & amis",es:"discutir",fr:"se disputer",xes:"No me gusta discutir por tonterías.",xfr:"Je n'aime pas me disputer pour des bêtises."},
+{id:"v179",lvl:"B1",th:"Voisins & amis",es:"llevarse bien",fr:"bien s'entendre",xes:"Me llevo bien con mis vecinos.",xfr:"Je m'entends bien avec mes voisins."},
+{id:"v180",lvl:"B1",th:"Voisins & amis",es:"apoyar",fr:"soutenir",xes:"Mis amigos siempre me apoyan.",xfr:"Mes amis me soutiennent toujours."},
+{id:"v181",lvl:"B1",th:"Voisins & amis",es:"la sociedad",fr:"la société",xes:"La sociedad actual cambia muy rápido.",xfr:"La société actuelle change très vite."},
+{id:"v182",lvl:"B1",th:"Voisins & amis",es:"la igualdad",fr:"l'égalité",xes:"Luchamos por la igualdad de derechos.",xfr:"Nous luttons pour l'égalité des droits."},
+{id:"v183",lvl:"B1",th:"Voisins & amis",es:"el vecino",fr:"le voisin",xes:"Mi vecino es muy amable.",xfr:"Mon voisin est très gentil."},
+{id:"v184",lvl:"B1",th:"Voisins & amis",es:"la comunidad",fr:"la communauté",xes:"Toda la comunidad ayudó tras la tormenta.",xfr:"Toute la communauté a aidé après la tempête."},
+// --- Téléphone & internet (B1) ---
+{id:"v165",lvl:"B1",th:"Téléphone & internet",es:"el ordenador",fr:"l'ordinateur",xes:"Mi ordenador es muy lento.",xfr:"Mon ordinateur est très lent."},
+{id:"v166",lvl:"B1",th:"Téléphone & internet",es:"el móvil",fr:"le portable",xes:"Dejé el móvil en casa.",xfr:"J'ai laissé mon portable à la maison."},
+{id:"v167",lvl:"B1",th:"Téléphone & internet",es:"la aplicación",fr:"l'application",xes:"Esta aplicación es gratuita.",xfr:"Cette application est gratuite."},
+{id:"v168",lvl:"B1",th:"Téléphone & internet",es:"la contraseña",fr:"le mot de passe",xes:"He olvidado mi contraseña.",xfr:"J'ai oublié mon mot de passe."},
+{id:"v169",lvl:"B1",th:"Téléphone & internet",es:"descargar",fr:"télécharger",xes:"Voy a descargar la aplicación.",xfr:"Je vais télécharger l'application."},
+{id:"v170",lvl:"B1",th:"Téléphone & internet",es:"la red social",fr:"le réseau social",xes:"Paso demasiado tiempo en las redes sociales.",xfr:"Je passe trop de temps sur les réseaux sociaux."},
+{id:"v171",lvl:"B1",th:"Téléphone & internet",es:"la pantalla",fr:"l'écran",xes:"La pantalla del móvil está rota.",xfr:"L'écran du portable est cassé."},
+{id:"v172",lvl:"B1",th:"Téléphone & internet",es:"guardar",fr:"enregistrer",xes:"No olvides guardar el archivo.",xfr:"N'oublie pas d'enregistrer le fichier."},
+{id:"v173",lvl:"B1",th:"Téléphone & internet",es:"el archivo",fr:"le fichier",xes:"Adjunto el archivo en el correo.",xfr:"Je joins le fichier dans l'e-mail."},
+{id:"v174",lvl:"B1",th:"Téléphone & internet",es:"conectarse",fr:"se connecter",xes:"No puedo conectarme al wifi.",xfr:"Je n'arrive pas à me connecter au wifi."},
+// --- Déchets, énergie & environnement (B1) ---
+{id:"v155",lvl:"B1",th:"Écologie & déchets",es:"el medio ambiente",fr:"l'environnement",xes:"Debemos cuidar el medio ambiente.",xfr:"Nous devons prendre soin de l'environnement."},
+{id:"v156",lvl:"B1",th:"Écologie & déchets",es:"el cambio climático",fr:"le changement climatique",xes:"El cambio climático afecta a todo el planeta.",xfr:"Le changement climatique affecte toute la planète."},
+{id:"v157",lvl:"B1",th:"Écologie & déchets",es:"reciclar",fr:"recycler",xes:"Es importante reciclar el vidrio.",xfr:"Il est important de recycler le verre."},
+{id:"v158",lvl:"B1",th:"Écologie & déchets",es:"la contaminación",fr:"la pollution",xes:"La contaminación del aire aumenta en las ciudades.",xfr:"La pollution de l'air augmente dans les villes."},
+{id:"v159",lvl:"B1",th:"Écologie & déchets",es:"la energía renovable",fr:"l'énergie renouvelable",xes:"Esta fábrica usa energía renovable.",xfr:"Cette usine utilise de l'énergie renouvelable."},
+{id:"v160",lvl:"B1",th:"Écologie & déchets",es:"el planeta",fr:"la planète",xes:"Debemos proteger nuestro planeta.",xfr:"Nous devons protéger notre planète."},
+{id:"v161",lvl:"B1",th:"Écologie & déchets",es:"proteger",fr:"protéger",xes:"Debemos proteger los bosques.",xfr:"Nous devons protéger les forêts."},
+{id:"v162",lvl:"B1",th:"Écologie & déchets",es:"la basura",fr:"les déchets",xes:"Saca la basura antes de las ocho.",xfr:"Sors les poubelles avant huit heures."},
+{id:"v163",lvl:"B1",th:"Écologie & déchets",es:"el calentamiento global",fr:"le réchauffement climatique",xes:"El calentamiento global preocupa a los científicos.",xfr:"Le réchauffement climatique inquiète les scientifiques."},
+{id:"v164",lvl:"B1",th:"Écologie & déchets",es:"sostenible",fr:"durable",xes:"Buscamos un modelo de vida más sostenible.",xfr:"Nous cherchons un mode de vie plus durable."},
+// --- Actualité & médias (B1) ---
+{id:"v185",lvl:"B1",th:"Actualité & médias",es:"la noticia",fr:"la nouvelle / l'info",xes:"Esa noticia me sorprendió mucho.",xfr:"Cette nouvelle m'a beaucoup surpris."},
+{id:"v186",lvl:"B1",th:"Actualité & médias",es:"el periódico",fr:"le journal",xes:"Leo el periódico cada mañana.",xfr:"Je lis le journal chaque matin."},
+{id:"v187",lvl:"B1",th:"Actualité & médias",es:"la entrevista",fr:"l'interview",xes:"Vi su entrevista en la televisión.",xfr:"J'ai vu son interview à la télévision."},
+{id:"v188",lvl:"B1",th:"Actualité & médias",es:"el gobierno",fr:"le gouvernement",xes:"El gobierno anunció nuevas medidas.",xfr:"Le gouvernement a annoncé de nouvelles mesures."},
+{id:"v189",lvl:"B1",th:"Actualité & médias",es:"la elección",fr:"l'élection",xes:"Las elecciones son en noviembre.",xfr:"Les élections ont lieu en novembre."},
+{id:"v190",lvl:"B1",th:"Actualité & médias",es:"la ley",fr:"la loi",xes:"Esta ley entra en vigor mañana.",xfr:"Cette loi entre en vigueur demain."},
+{id:"v191",lvl:"B1",th:"Actualité & médias",es:"el ciudadano",fr:"le citoyen",xes:"Cada ciudadano tiene derecho a votar.",xfr:"Chaque citoyen a le droit de voter."},
+{id:"v192",lvl:"B1",th:"Actualité & médias",es:"manifestarse",fr:"manifester",xes:"Miles de personas se manifestaron ayer.",xfr:"Des milliers de personnes ont manifesté hier."},
+{id:"v193",lvl:"B1",th:"Actualité & médias",es:"el suceso",fr:"le fait divers / l'événement",xes:"El suceso ocurrió cerca de mi casa.",xfr:"L'événement s'est produit près de chez moi."},
+{id:"v194",lvl:"B1",th:"Actualité & médias",es:"informar",fr:"informer",xes:"El periódico informa sobre la crisis.",xfr:"Le journal informe sur la crise."},
+// --- Expressions imagées du quotidien (B2) ---
+{id:"v195",lvl:"B2",th:"Expressions imagées",es:"dar en el clavo",fr:"mettre dans le mille / voir juste",xes:"Has dado en el clavo con esa idea.",xfr:"Tu as vu juste avec cette idée."},
+{id:"v196",lvl:"B2",th:"Expressions imagées",es:"estar en las nubes",fr:"être dans la lune",xes:"Perdona, estaba en las nubes.",xfr:"Désolé, j'étais dans la lune."},
+{id:"v197",lvl:"B2",th:"Expressions imagées",es:"costar un ojo de la cara",fr:"coûter les yeux de la tête",xes:"Ese piso cuesta un ojo de la cara.",xfr:"Cet appartement coûte les yeux de la tête."},
+{id:"v198",lvl:"B2",th:"Expressions imagées",es:"no tener pelos en la lengua",fr:"ne pas mâcher ses mots",xes:"Mi abuela no tiene pelos en la lengua.",xfr:"Ma grand-mère ne mâche pas ses mots."},
+{id:"v199",lvl:"B2",th:"Expressions imagées",es:"ponerse las pilas",fr:"se bouger, s'y mettre sérieusement",xes:"Tienes que ponerte las pilas con el examen.",xfr:"Tu dois te bouger pour l'examen."},
+{id:"v200",lvl:"B2",th:"Expressions imagées",es:"tomar el pelo",fr:"se moquer de / faire marcher qqn",xes:"¿Me estás tomando el pelo?",xfr:"Tu te moques de moi ?"},
+{id:"v201",lvl:"B2",th:"Expressions imagées",es:"meter la pata",fr:"faire une gaffe",xes:"Metí la pata delante de todos.",xfr:"J'ai fait une gaffe devant tout le monde."},
+{id:"v202",lvl:"B2",th:"Expressions imagées",es:"estar hecho polvo",fr:"être épuisé, crevé",xes:"Después del viaje, estoy hecho polvo.",xfr:"Après le voyage, je suis crevé."},
+{id:"v203",lvl:"B2",th:"Expressions imagées",es:"ser pan comido",fr:"être du gâteau (très facile)",xes:"El examen fue pan comido.",xfr:"L'examen a été du gâteau."},
+{id:"v204",lvl:"B2",th:"Expressions imagées",es:"echar una mano",fr:"donner un coup de main",xes:"¿Puedes echarme una mano?",xfr:"Tu peux me donner un coup de main ?"},
+{id:"v205",lvl:"B2",th:"Expressions imagées",es:"no hay mal que por bien no venga",fr:"à quelque chose malheur est bon",xes:"Perdí el tren, pero no hay mal que por bien no venga: conocí a alguien interesante.",xfr:"J'ai raté le train, mais à quelque chose malheur est bon : j'ai rencontré quelqu'un d'intéressant."},
+{id:"v206",lvl:"B2",th:"Expressions imagées",es:"quedarse de piedra",fr:"rester bouche bée, être stupéfait",xes:"Me quedé de piedra con la noticia.",xfr:"Je suis resté bouche bée en apprenant la nouvelle."},
+{id:"v207",lvl:"B2",th:"Expressions imagées",es:"hablar por los codos",fr:"être bavard, parler sans arrêt",xes:"Mi tío habla por los codos.",xfr:"Mon oncle parle sans arrêt."},
+{id:"v208",lvl:"B2",th:"Expressions imagées",es:"dormir a pierna suelta",fr:"dormir à poings fermés",xes:"Anoche dormí a pierna suelta.",xfr:"Hier soir j'ai dormi à poings fermés."},
+// --- Connecteurs & nuances (B2) ---
+{id:"v219",lvl:"B2",th:"Connecteurs & nuances",es:"sin embargo",fr:"cependant",xes:"Está lloviendo; sin embargo, saldremos.",xfr:"Il pleut ; cependant, nous sortirons."},
+{id:"v220",lvl:"B2",th:"Connecteurs & nuances",es:"no obstante",fr:"néanmoins",xes:"El plan es arriesgado; no obstante, puede funcionar.",xfr:"Le plan est risqué ; néanmoins, il peut fonctionner."},
+{id:"v221",lvl:"B2",th:"Connecteurs & nuances",es:"por consiguiente",fr:"par conséquent",xes:"No estudió; por consiguiente, suspendió.",xfr:"Il n'a pas étudié ; par conséquent, il a échoué."},
+{id:"v222",lvl:"B2",th:"Connecteurs & nuances",es:"es decir",fr:"c'est-à-dire",xes:"Es vegetariano, es decir, no come carne.",xfr:"Il est végétarien, c'est-à-dire qu'il ne mange pas de viande."},
+{id:"v223",lvl:"B2",th:"Connecteurs & nuances",es:"en cuanto a",fr:"en ce qui concerne",xes:"En cuanto al precio, podemos negociar.",xfr:"En ce qui concerne le prix, on peut négocier."},
+{id:"v224",lvl:"B2",th:"Connecteurs & nuances",es:"a pesar de",fr:"malgré",xes:"Salimos a pesar de la lluvia.",xfr:"Nous sommes sortis malgré la pluie."},
+{id:"v225",lvl:"B2",th:"Connecteurs & nuances",es:"con tal de que",fr:"pourvu que",xes:"Te ayudo, con tal de que me escuches.",xfr:"Je t'aide, pourvu que tu m'écoutes."},
+{id:"v226",lvl:"B2",th:"Connecteurs & nuances",es:"siempre que",fr:"à condition que",xes:"Puedes venir, siempre que avises antes.",xfr:"Tu peux venir, à condition de prévenir avant."},
+{id:"v227",lvl:"B2",th:"Connecteurs & nuances",es:"de hecho",fr:"en fait",xes:"De hecho, ya lo sabía.",xfr:"En fait, je le savais déjà."},
+{id:"v228",lvl:"B2",th:"Connecteurs & nuances",es:"por un lado / por otro lado",fr:"d'un côté / de l'autre",xes:"Por un lado quiero viajar, por otro lado quiero ahorrar.",xfr:"D'un côté je veux voyager, de l'autre je veux économiser."},
+{id:"v229",lvl:"B2",th:"Connecteurs & nuances",es:"en resumen",fr:"en résumé",xes:"En resumen, el proyecto fue un éxito.",xfr:"En résumé, le projet a été un succès."},
+// --- Sorties, ciné & culture (B2) ---
+{id:"v230",lvl:"B2",th:"Sorties & culture",es:"la obra de arte",fr:"l'œuvre d'art",xes:"Ese cuadro es una obra de arte única.",xfr:"Ce tableau est une œuvre d'art unique."},
+{id:"v231",lvl:"B2",th:"Sorties & culture",es:"el escritor",fr:"l'écrivain",xes:"El escritor presentó su nuevo libro.",xfr:"L'écrivain a présenté son nouveau livre."},
+{id:"v232",lvl:"B2",th:"Sorties & culture",es:"la novela",fr:"le roman",xes:"Estoy leyendo una novela policíaca.",xfr:"Je lis un roman policier."},
+{id:"v233",lvl:"B2",th:"Sorties & culture",es:"la exposición",fr:"l'exposition",xes:"La exposición termina a finales de mes.",xfr:"L'exposition se termine à la fin du mois."},
+{id:"v234",lvl:"B2",th:"Sorties & culture",es:"el rodaje",fr:"le tournage (cinéma)",xes:"El rodaje de la película duró seis meses.",xfr:"Le tournage du film a duré six mois."},
+{id:"v235",lvl:"B2",th:"Sorties & culture",es:"el guion",fr:"le scénario",xes:"Ella escribió el guion de la serie.",xfr:"Elle a écrit le scénario de la série."},
+{id:"v236",lvl:"B2",th:"Sorties & culture",es:"el escenario",fr:"la scène",xes:"Los actores subieron al escenario.",xfr:"Les acteurs sont montés sur scène."},
+{id:"v237",lvl:"B2",th:"Sorties & culture",es:"la crítica",fr:"la critique",xes:"La película recibió muy buenas críticas.",xfr:"Le film a reçu de très bonnes critiques."},
+{id:"v238",lvl:"B2",th:"Sorties & culture",es:"el patrimonio",fr:"le patrimoine",xes:"Este castillo es patrimonio de la humanidad.",xfr:"Ce château est un patrimoine de l'humanité."},
+{id:"v239",lvl:"B2",th:"Sorties & culture",es:"la corriente artística",fr:"le courant artistique",xes:"El cubismo es una corriente artística del siglo veinte.",xfr:"Le cubisme est un courant artistique du vingtième siècle."},
+// --- Argent, impôts & économie (B2) ---
+{id:"v209",lvl:"B2",th:"Argent & impôts",es:"el PIB",fr:"le PIB (produit intérieur brut)",xes:"El PIB del país creció un tres por ciento.",xfr:"Le PIB du pays a augmenté de trois pour cent."},
+{id:"v210",lvl:"B2",th:"Argent & impôts",es:"la inflación",fr:"l'inflation",xes:"La inflación sube el precio de todo.",xfr:"L'inflation fait monter le prix de tout."},
+{id:"v211",lvl:"B2",th:"Argent & impôts",es:"el impuesto",fr:"l'impôt",xes:"Pagamos impuestos sobre la renta cada año.",xfr:"Nous payons l'impôt sur le revenu chaque année."},
+{id:"v212",lvl:"B2",th:"Argent & impôts",es:"la empresa",fr:"l'entreprise",xes:"Trabajo en una empresa francesa.",xfr:"Je travaille dans une entreprise française."},
+{id:"v213",lvl:"B2",th:"Argent & impôts",es:"invertir",fr:"investir",xes:"La empresa quiere invertir en tecnología.",xfr:"L'entreprise veut investir dans la technologie."},
+{id:"v214",lvl:"B2",th:"Argent & impôts",es:"el desempleo",fr:"le chômage",xes:"El desempleo bajó este trimestre.",xfr:"Le chômage a baissé ce trimestre."},
+{id:"v215",lvl:"B2",th:"Argent & impôts",es:"la deuda",fr:"la dette",xes:"La deuda pública sigue aumentando.",xfr:"La dette publique continue d'augmenter."},
+{id:"v216",lvl:"B2",th:"Argent & impôts",es:"el mercado",fr:"le marché",xes:"El mercado bursátil cayó ayer.",xfr:"Le marché boursier a chuté hier."},
+{id:"v217",lvl:"B2",th:"Argent & impôts",es:"la crisis",fr:"la crise",xes:"La crisis económica afectó a muchas familias.",xfr:"La crise économique a touché de nombreuses familles."},
+{id:"v218",lvl:"B2",th:"Argent & impôts",es:"el presupuesto",fr:"le budget",xes:"El gobierno presentó el presupuesto del año próximo.",xfr:"Le gouvernement a présenté le budget de l'année prochaine."},
+// --- Carrière & entreprise (B2) ---
+{id:"v400",lvl:"B2",th:"Carrière & entreprise",es:"la plantilla",fr:"l'effectif, le personnel",xes:"La plantilla de la empresa supera los doscientos empleados.",xfr:"L'effectif de l'entreprise dépasse les deux cents employés."},
+{id:"v401",lvl:"B2",th:"Carrière & entreprise",es:"el ascenso",fr:"la promotion",xes:"Le han dado un ascenso después de tres años.",xfr:"On lui a accordé une promotion au bout de trois ans."},
+{id:"v402",lvl:"B2",th:"Carrière & entreprise",es:"despedir",fr:"licencier",xes:"La empresa tuvo que despedir a diez trabajadores.",xfr:"L'entreprise a dû licencier dix salariés."},
+{id:"v403",lvl:"B2",th:"Carrière & entreprise",es:"la jubilación",fr:"la retraite",xes:"Mi padre se acerca a la jubilación.",xfr:"Mon père approche de la retraite."},
+{id:"v404",lvl:"B2",th:"Carrière & entreprise",es:"la entrevista de trabajo",fr:"l'entretien d'embauche",xes:"Mañana tengo una entrevista de trabajo.",xfr:"Demain, j'ai un entretien d'embauche."},
+{id:"v405",lvl:"B2",th:"Carrière & entreprise",es:"el currículum",fr:"le CV",xes:"Adjunto mi currículum a este correo.",xfr:"Je joins mon CV à ce courriel."},
+{id:"v406",lvl:"B2",th:"Carrière & entreprise",es:"el plazo",fr:"le délai",xes:"El plazo de entrega termina el viernes.",xfr:"Le délai de livraison se termine vendredi."},
+{id:"v407",lvl:"B2",th:"Carrière & entreprise",es:"el contrato indefinido",fr:"le CDI",xes:"Por fin me han ofrecido un contrato indefinido.",xfr:"On m'a enfin proposé un CDI."},
+{id:"v408",lvl:"B2",th:"Carrière & entreprise",es:"la baja",fr:"l'arrêt maladie",xes:"Está de baja desde el lunes.",xfr:"Il est en arrêt maladie depuis lundi."},
+{id:"v409",lvl:"B2",th:"Carrière & entreprise",es:"la negociación",fr:"la négociation",xes:"La negociación duró toda la noche.",xfr:"La négociation a duré toute la nuit."},
+{id:"v410",lvl:"B2",th:"Carrière & entreprise",es:"el proveedor",fr:"le fournisseur",xes:"Cambiamos de proveedor para ahorrar costes.",xfr:"Nous changeons de fournisseur pour réduire les coûts."},
+{id:"v411",lvl:"B2",th:"Carrière & entreprise",es:"cumplir con",fr:"respecter, honorer",xes:"Hay que cumplir con los plazos acordados.",xfr:"Il faut respecter les délais convenus."},
+{id:"v412",lvl:"B2",th:"Carrière & entreprise",es:"la sede",fr:"le siège (d'une entreprise)",xes:"La sede de la empresa está en Bilbao.",xfr:"Le siège de l'entreprise est à Bilbao."},
+{id:"v413",lvl:"B2",th:"Carrière & entreprise",es:"emprender",fr:"se lancer, entreprendre",xes:"Quiere emprender su propio negocio.",xfr:"Il veut lancer sa propre entreprise."},
+{id:"v414",lvl:"B2",th:"Carrière & entreprise",es:"el beneficio",fr:"le bénéfice",xes:"Este año los beneficios han subido un diez por ciento.",xfr:"Cette année, les bénéfices ont augmenté de dix pour cent."},
+// --- Santé & mode de vie (B2) ---
+{id:"v415",lvl:"B2",th:"Santé & mode de vie",es:"el estrés",fr:"le stress",xes:"El estrés me impide dormir bien.",xfr:"Le stress m'empêche de bien dormir."},
+{id:"v416",lvl:"B2",th:"Santé & mode de vie",es:"la dieta equilibrada",fr:"l'alimentation équilibrée",xes:"Una dieta equilibrada previene muchas enfermedades.",xfr:"Une alimentation équilibrée prévient beaucoup de maladies."},
+{id:"v417",lvl:"B2",th:"Santé & mode de vie",es:"el sedentarismo",fr:"la sédentarité",xes:"El sedentarismo es un riesgo para la salud.",xfr:"La sédentarité est un risque pour la santé."},
+{id:"v418",lvl:"B2",th:"Santé & mode de vie",es:"la receta médica",fr:"l'ordonnance",xes:"Sin receta médica no te lo dan.",xfr:"Sans ordonnance, on ne te le donne pas."},
+{id:"v419",lvl:"B2",th:"Santé & mode de vie",es:"recuperarse",fr:"se rétablir",xes:"Se está recuperando de la operación.",xfr:"Il se rétablit de l'opération."},
+{id:"v420",lvl:"B2",th:"Santé & mode de vie",es:"el agotamiento",fr:"l'épuisement",xes:"Sufrió un agotamiento por exceso de trabajo.",xfr:"Il a fait un épuisement à cause d'un excès de travail."},
+{id:"v421",lvl:"B2",th:"Santé & mode de vie",es:"la alimentación",fr:"l'alimentation",xes:"Cuida mucho su alimentación.",xfr:"Elle fait très attention à son alimentation."},
+{id:"v422",lvl:"B2",th:"Santé & mode de vie",es:"engordar",fr:"grossir",xes:"Engordé tres kilos en vacaciones.",xfr:"J'ai pris trois kilos pendant les vacances."},
+{id:"v423",lvl:"B2",th:"Santé & mode de vie",es:"adelgazar",fr:"maigrir",xes:"Quiere adelgazar antes del verano.",xfr:"Il veut maigrir avant l'été."},
+{id:"v424",lvl:"B2",th:"Santé & mode de vie",es:"el hábito",fr:"l'habitude",xes:"Es un hábito difícil de cambiar.",xfr:"C'est une habitude difficile à changer."},
+{id:"v425",lvl:"B2",th:"Santé & mode de vie",es:"la vacuna",fr:"le vaccin",xes:"La vacuna protege contra la gripe.",xfr:"Le vaccin protège contre la grippe."},
+{id:"v426",lvl:"B2",th:"Santé & mode de vie",es:"el bienestar",fr:"le bien-être",xes:"Caminar mejora nuestro bienestar.",xfr:"Marcher améliore notre bien-être."},
+{id:"v427",lvl:"B2",th:"Santé & mode de vie",es:"desconectar",fr:"décrocher, se déconnecter",xes:"Necesito desconectar del trabajo unos días.",xfr:"J'ai besoin de décrocher du travail quelques jours."},
+{id:"v428",lvl:"B2",th:"Santé & mode de vie",es:"la ansiedad",fr:"l'anxiété",xes:"La ansiedad le provoca dolor de estómago.",xfr:"L'anxiété lui provoque des maux d'estomac."},
+{id:"v429",lvl:"B2",th:"Santé & mode de vie",es:"el descanso",fr:"le repos",xes:"El descanso es tan importante como el ejercicio.",xfr:"Le repos est aussi important que l'exercice."},
+// --- Sciences & technologie (B2) ---
+{id:"v430",lvl:"B2",th:"Sciences & technologie",es:"el avance",fr:"l'avancée",xes:"Es un gran avance para la medicina.",xfr:"C'est une grande avancée pour la médecine."},
+{id:"v431",lvl:"B2",th:"Sciences & technologie",es:"la investigación",fr:"la recherche",xes:"La investigación ha durado diez años.",xfr:"La recherche a duré dix ans."},
+{id:"v432",lvl:"B2",th:"Sciences & technologie",es:"el descubrimiento",fr:"la découverte",xes:"El descubrimiento cambió la historia de la ciencia.",xfr:"La découverte a changé l'histoire de la science."},
+{id:"v433",lvl:"B2",th:"Sciences & technologie",es:"la inteligencia artificial",fr:"l'intelligence artificielle",xes:"La inteligencia artificial está transformando muchos oficios.",xfr:"L'intelligence artificielle transforme beaucoup de métiers."},
+{id:"v434",lvl:"B2",th:"Sciences & technologie",es:"la privacidad",fr:"la vie privée",xes:"Muchos usuarios se preocupan por su privacidad.",xfr:"Beaucoup d'utilisateurs se soucient de leur vie privée."},
+{id:"v435",lvl:"B2",th:"Sciences & technologie",es:"el dispositivo",fr:"l'appareil",xes:"Este dispositivo se carga en una hora.",xfr:"Cet appareil se recharge en une heure."},
+{id:"v436",lvl:"B2",th:"Sciences & technologie",es:"la brecha digital",fr:"la fracture numérique",xes:"La brecha digital afecta sobre todo a los mayores.",xfr:"La fracture numérique touche surtout les personnes âgées."},
+{id:"v437",lvl:"B2",th:"Sciences & technologie",es:"el algoritmo",fr:"l'algorithme",xes:"El algoritmo decide qué vídeos ves.",xfr:"L'algorithme décide quelles vidéos tu vois."},
+{id:"v438",lvl:"B2",th:"Sciences & technologie",es:"la batería",fr:"la batterie",xes:"Se me ha acabado la batería.",xfr:"Ma batterie est à plat."},
+{id:"v439",lvl:"B2",th:"Sciences & technologie",es:"actualizar",fr:"mettre à jour",xes:"Tienes que actualizar el programa.",xfr:"Tu dois mettre à jour le logiciel."},
+{id:"v440",lvl:"B2",th:"Sciences & technologie",es:"el teletrabajo",fr:"le télétravail",xes:"El teletrabajo ahorra mucho tiempo de transporte.",xfr:"Le télétravail fait gagner beaucoup de temps de transport."},
+{id:"v441",lvl:"B2",th:"Sciences & technologie",es:"fiable",fr:"fiable",xes:"Es una fuente de información muy fiable.",xfr:"C'est une source d'information très fiable."},
+{id:"v442",lvl:"B2",th:"Sciences & technologie",es:"el bulo",fr:"la fausse information",xes:"Circula un bulo sobre el alcalde.",xfr:"Une fausse information circule sur le maire."},
+{id:"v443",lvl:"B2",th:"Sciences & technologie",es:"comprobar",fr:"vérifier",xes:"Comprueba los datos antes de publicarlos.",xfr:"Vérifie les données avant de les publier."},
+{id:"v444",lvl:"B2",th:"Sciences & technologie",es:"el prototipo",fr:"le prototype",xes:"Presentaron el prototipo en la feria.",xfr:"Ils ont présenté le prototype au salon."},
+// --- Politique & institutions (C1) ---
+{id:"v445",lvl:"C1",th:"Politique & institutions",es:"el parlamento",fr:"le parlement",xes:"El parlamento debatirá la reforma la próxima semana.",xfr:"Le parlement débattra de la réforme la semaine prochaine."},
+{id:"v446",lvl:"C1",th:"Politique & institutions",es:"la reforma",fr:"la réforme",xes:"La reforma laboral generó mucha polémica.",xfr:"La réforme du travail a suscité beaucoup de polémique."},
+{id:"v447",lvl:"C1",th:"Politique & institutions",es:"el mandato",fr:"le mandat",xes:"Su mandato termina dentro de dos años.",xfr:"Son mandat se termine dans deux ans."},
+{id:"v448",lvl:"C1",th:"Politique & institutions",es:"aprobar",fr:"adopter (une loi)",xes:"El Congreso aprobó la ley por mayoría absoluta.",xfr:"Le Congrès a adopté la loi à la majorité absolue."},
+{id:"v449",lvl:"C1",th:"Politique & institutions",es:"la mayoría absoluta",fr:"la majorité absolue",xes:"Ningún partido consiguió la mayoría absoluta.",xfr:"Aucun parti n'a obtenu la majorité absolue."},
+{id:"v450",lvl:"C1",th:"Politique & institutions",es:"la coalición",fr:"la coalition",xes:"Los dos partidos formaron una coalición de gobierno.",xfr:"Les deux partis ont formé une coalition de gouvernement."},
+{id:"v451",lvl:"C1",th:"Politique & institutions",es:"la moción de censura",fr:"la motion de censure",xes:"La oposición presentó una moción de censura.",xfr:"L'opposition a déposé une motion de censure."},
+{id:"v452",lvl:"C1",th:"Politique & institutions",es:"dimitir",fr:"démissionner",xes:"El ministro dimitió tras el escándalo.",xfr:"Le ministre a démissionné après le scandale."},
+{id:"v453",lvl:"C1",th:"Politique & institutions",es:"el escaño",fr:"le siège (au parlement)",xes:"El partido perdió tres escaños en las elecciones.",xfr:"Le parti a perdu trois sièges aux élections."},
+{id:"v454",lvl:"C1",th:"Politique & institutions",es:"la campaña electoral",fr:"la campagne électorale",xes:"La campaña electoral empieza el viernes.",xfr:"La campagne électorale commence vendredi."},
+{id:"v455",lvl:"C1",th:"Politique & institutions",es:"el sufragio",fr:"le suffrage",xes:"El sufragio universal es un derecho fundamental.",xfr:"Le suffrage universel est un droit fondamental."},
+{id:"v456",lvl:"C1",th:"Politique & institutions",es:"la abstención",fr:"l'abstention",xes:"La abstención superó el cuarenta por ciento.",xfr:"L'abstention a dépassé les quarante pour cent."},
+{id:"v457",lvl:"C1",th:"Politique & institutions",es:"el ayuntamiento",fr:"la mairie",xes:"El ayuntamiento aprobó nuevas ayudas al alquiler.",xfr:"La mairie a voté de nouvelles aides au logement."},
+{id:"v458",lvl:"C1",th:"Politique & institutions",es:"la soberanía",fr:"la souveraineté",xes:"Defienden la soberanía del pueblo.",xfr:"Ils défendent la souveraineté du peuple."},
+{id:"v459",lvl:"C1",th:"Politique & institutions",es:"la comunidad autónoma",fr:"la communauté autonome",xes:"Cada comunidad autónoma tiene competencias propias en sanidad.",xfr:"Chaque communauté autonome a ses propres compétences en matière de santé."},
+// --- Droit & justice (C1) ---
+{id:"v460",lvl:"C1",th:"Droit & justice",es:"el juicio",fr:"le procès",xes:"El juicio se celebrará en septiembre.",xfr:"Le procès aura lieu en septembre."},
+{id:"v461",lvl:"C1",th:"Droit & justice",es:"el tribunal",fr:"le tribunal",xes:"El tribunal escuchó a los testigos.",xfr:"Le tribunal a entendu les témoins."},
+{id:"v462",lvl:"C1",th:"Droit & justice",es:"la sentencia",fr:"le jugement",xes:"La sentencia se dictó ayer por la tarde.",xfr:"Le jugement a été rendu hier après-midi."},
+{id:"v463",lvl:"C1",th:"Droit & justice",es:"recurrir",fr:"faire appel, contester",xes:"Su abogado va a recurrir la sentencia.",xfr:"Son avocat va faire appel du jugement."},
+{id:"v464",lvl:"C1",th:"Droit & justice",es:"el acusado",fr:"l'accusé",xes:"El acusado negó todos los cargos.",xfr:"L'accusé a nié toutes les charges."},
+{id:"v465",lvl:"C1",th:"Droit & justice",es:"el testigo",fr:"le témoin",xes:"El testigo aseguró que no vio nada.",xfr:"Le témoin a assuré qu'il n'avait rien vu."},
+{id:"v466",lvl:"C1",th:"Droit & justice",es:"la fianza",fr:"la caution",xes:"Pagó una fianza para salir en libertad.",xfr:"Il a versé une caution pour être libéré."},
+{id:"v467",lvl:"C1",th:"Droit & justice",es:"absolver",fr:"acquitter",xes:"El jurado absolvió al acusado por falta de pruebas.",xfr:"Le jury a acquitté l'accusé faute de preuves."},
+{id:"v468",lvl:"C1",th:"Droit & justice",es:"la prueba",fr:"la preuve",xes:"No había ninguna prueba contra él.",xfr:"Il n'y avait aucune preuve contre lui."},
+{id:"v469",lvl:"C1",th:"Droit & justice",es:"la demanda",fr:"la plainte, l'action en justice",xes:"Presentó una demanda contra su antiguo casero.",xfr:"Il a déposé une plainte contre son ancien propriétaire."},
+{id:"v470",lvl:"C1",th:"Droit & justice",es:"el delito",fr:"le délit",xes:"Es un delito castigado con prisión.",xfr:"C'est un délit puni de prison."},
+{id:"v471",lvl:"C1",th:"Droit & justice",es:"vulnerar",fr:"violer, enfreindre",xes:"Esta medida vulnera los derechos de los trabajadores.",xfr:"Cette mesure viole les droits des travailleurs."},
+{id:"v472",lvl:"C1",th:"Droit & justice",es:"la cláusula",fr:"la clause",xes:"Lee bien la cláusula de rescisión del contrato.",xfr:"Lis bien la clause de résiliation du contrat."},
+{id:"v473",lvl:"C1",th:"Droit & justice",es:"el fallo",fr:"le verdict, la décision",xes:"El fallo del tribunal sentó jurisprudencia.",xfr:"La décision du tribunal a fait jurisprudence."},
+{id:"v474",lvl:"C1",th:"Droit & justice",es:"el abogado",fr:"l'avocat",xes:"Necesitas un abogado especializado en derecho laboral.",xfr:"Tu as besoin d'un avocat spécialisé en droit du travail."},
+// --- Économie & finance (C1) ---
+{id:"v475",lvl:"C1",th:"Économie & finance",es:"la recesión",fr:"la récession",xes:"El país entró en recesión el año pasado.",xfr:"Le pays est entré en récession l'an dernier."},
+{id:"v476",lvl:"C1",th:"Économie & finance",es:"el déficit",fr:"le déficit",xes:"El déficit público sigue sin control.",xfr:"Le déficit public reste hors de contrôle."},
+{id:"v477",lvl:"C1",th:"Économie & finance",es:"el tipo de interés",fr:"le taux d'intérêt",xes:"El banco central subió los tipos de interés.",xfr:"La banque centrale a relevé les taux d'intérêt."},
+{id:"v478",lvl:"C1",th:"Économie & finance",es:"la hipoteca",fr:"le prêt immobilier",xes:"Todavía pagamos la hipoteca del piso.",xfr:"Nous remboursons encore le prêt de l'appartement."},
+{id:"v479",lvl:"C1",th:"Économie & finance",es:"el ahorro",fr:"l'épargne",xes:"Sus ahorros no bastan para comprar casa.",xfr:"Ses économies ne suffisent pas pour acheter une maison."},
+{id:"v480",lvl:"C1",th:"Économie & finance",es:"cotizar",fr:"cotiser",xes:"Cotiza a la Seguridad Social desde los veinte años.",xfr:"Il cotise à la Sécurité sociale depuis l'âge de vingt ans."},
+{id:"v481",lvl:"C1",th:"Économie & finance",es:"la subvención",fr:"la subvention",xes:"La empresa recibió una subvención pública.",xfr:"L'entreprise a reçu une subvention publique."},
+{id:"v482",lvl:"C1",th:"Économie & finance",es:"la quiebra",fr:"la faillite",xes:"La empresa se declaró en quiebra.",xfr:"L'entreprise s'est déclarée en faillite."},
+{id:"v483",lvl:"C1",th:"Économie & finance",es:"el accionista",fr:"l'actionnaire",xes:"Los accionistas exigen mayores beneficios.",xfr:"Les actionnaires exigent de plus gros bénéfices."},
+{id:"v484",lvl:"C1",th:"Économie & finance",es:"la rentabilidad",fr:"la rentabilité",xes:"Buscan una mayor rentabilidad para sus inversiones.",xfr:"Ils cherchent une meilleure rentabilité pour leurs investissements."},
+{id:"v485",lvl:"C1",th:"Économie & finance",es:"gravar",fr:"taxer, imposer",xes:"El gobierno quiere gravar las grandes fortunas.",xfr:"Le gouvernement veut taxer les grandes fortunes."},
+{id:"v486",lvl:"C1",th:"Économie & finance",es:"la brecha salarial",fr:"l'écart salarial",xes:"La brecha salarial entre hombres y mujeres persiste.",xfr:"L'écart salarial entre hommes et femmes persiste."},
+{id:"v487",lvl:"C1",th:"Économie & finance",es:"el salario mínimo",fr:"le SMIC",xes:"El salario mínimo subirá el próximo año.",xfr:"Le SMIC augmentera l'année prochaine."},
+{id:"v488",lvl:"C1",th:"Économie & finance",es:"la fusión",fr:"la fusion",xes:"La fusión de los dos bancos creó un gigante.",xfr:"La fusion des deux banques a créé un géant."},
+{id:"v489",lvl:"C1",th:"Économie & finance",es:"la coyuntura",fr:"la conjoncture",xes:"En la coyuntura actual, conviene ser prudente.",xfr:"Dans la conjoncture actuelle, il convient d'être prudent."},
+// --- Médias & opinion (C1) ---
+{id:"v490",lvl:"C1",th:"Médias & opinion",es:"el titular",fr:"le gros titre",xes:"Solo leí el titular, no el artículo.",xfr:"J'ai seulement lu le titre, pas l'article."},
+{id:"v491",lvl:"C1",th:"Médias & opinion",es:"el editorial",fr:"l'éditorial",xes:"El editorial critica duramente al gobierno.",xfr:"L'éditorial critique durement le gouvernement."},
+{id:"v492",lvl:"C1",th:"Médias & opinion",es:"el corresponsal",fr:"le correspondant",xes:"El corresponsal informa desde Buenos Aires.",xfr:"Le correspondant rend compte depuis Buenos Aires."},
+{id:"v493",lvl:"C1",th:"Médias & opinion",es:"desmentir",fr:"démentir",xes:"El ministerio desmintió la noticia.",xfr:"Le ministère a démenti la nouvelle."},
+{id:"v494",lvl:"C1",th:"Médias & opinion",es:"la polémica",fr:"la polémique",xes:"La polémica no deja de crecer.",xfr:"La polémique ne cesse de grandir."},
+{id:"v495",lvl:"C1",th:"Médias & opinion",es:"el sesgo",fr:"le biais",xes:"El artículo tiene un claro sesgo político.",xfr:"L'article a un net biais politique."},
+{id:"v496",lvl:"C1",th:"Médias & opinion",es:"la desinformación",fr:"la désinformation",xes:"La desinformación circula muy rápido en las redes.",xfr:"La désinformation circule très vite sur les réseaux."},
+{id:"v497",lvl:"C1",th:"Médias & opinion",es:"el reportaje",fr:"le reportage",xes:"Hicieron un reportaje sobre la vida rural.",xfr:"Ils ont fait un reportage sur la vie rurale."},
+{id:"v498",lvl:"C1",th:"Médias & opinion",es:"hacerse eco de",fr:"se faire l'écho de",xes:"Varios medios se hicieron eco de la noticia.",xfr:"Plusieurs médias se sont fait l'écho de la nouvelle."},
+{id:"v499",lvl:"C1",th:"Médias & opinion",es:"la censura",fr:"la censure",xes:"La censura limita la libertad de expresión.",xfr:"La censure limite la liberté d'expression."},
+{id:"v500",lvl:"C1",th:"Médias & opinion",es:"la opinión pública",fr:"l'opinion publique",xes:"La opinión pública exige explicaciones.",xfr:"L'opinion publique exige des explications."},
+{id:"v501",lvl:"C1",th:"Médias & opinion",es:"el columnista",fr:"le chroniqueur",xes:"Es columnista de un diario nacional.",xfr:"Il est chroniqueur dans un quotidien national."},
+{id:"v502",lvl:"C1",th:"Médias & opinion",es:"la tertulia",fr:"le débat entre habitués",xes:"Le gusta participar en tertulias radiofónicas.",xfr:"Il aime participer à des débats radiophoniques."},
+{id:"v503",lvl:"C1",th:"Médias & opinion",es:"contrastar",fr:"recouper (une information)",xes:"Hay que contrastar las fuentes antes de publicar.",xfr:"Il faut recouper les sources avant de publier."},
+{id:"v504",lvl:"C1",th:"Médias & opinion",es:"la primicia",fr:"l'exclusivité, le scoop",xes:"El periódico dio la primicia de la dimisión.",xfr:"Le journal a eu l'exclusivité de la démission."},
+// --- Environnement & énergie (C1) ---
+{id:"v505",lvl:"C1",th:"Environnement & énergie",es:"la sequía",fr:"la sécheresse",xes:"La sequía arruinó la cosecha de este año.",xfr:"La sécheresse a ruiné la récolte de cette année."},
+{id:"v506",lvl:"C1",th:"Environnement & énergie",es:"el vertido",fr:"le déversement (polluant)",xes:"Un vertido de petróleo contaminó la costa.",xfr:"Un déversement de pétrole a pollué la côte."},
+{id:"v507",lvl:"C1",th:"Environnement & énergie",es:"la huella de carbono",fr:"l'empreinte carbone",xes:"Queremos reducir nuestra huella de carbono.",xfr:"Nous voulons réduire notre empreinte carbone."},
+{id:"v508",lvl:"C1",th:"Environnement & énergie",es:"la biodiversidad",fr:"la biodiversité",xes:"La biodiversidad de la zona está amenazada.",xfr:"La biodiversité de la région est menacée."},
+{id:"v509",lvl:"C1",th:"Environnement & énergie",es:"la deforestación",fr:"la déforestation",xes:"La deforestación avanza en la selva.",xfr:"La déforestation progresse dans la forêt."},
+{id:"v510",lvl:"C1",th:"Environnement & énergie",es:"el deshielo",fr:"la fonte des glaces",xes:"El deshielo eleva el nivel del mar.",xfr:"La fonte des glaces fait monter le niveau de la mer."},
+{id:"v511",lvl:"C1",th:"Environnement & énergie",es:"la sobreexplotación",fr:"la surexploitation",xes:"La sobreexplotación de los acuíferos preocupa a los expertos.",xfr:"La surexploitation des nappes phréatiques inquiète les experts."},
+{id:"v512",lvl:"C1",th:"Environnement & énergie",es:"las emisiones",fr:"les émissions",xes:"Hay que reducir las emisiones de gases contaminantes.",xfr:"Il faut réduire les émissions de gaz polluants."},
+{id:"v513",lvl:"C1",th:"Environnement & énergie",es:"paliar",fr:"atténuer",xes:"Se toman medidas para paliar los efectos de la sequía.",xfr:"On prend des mesures pour atténuer les effets de la sécheresse."},
+{id:"v514",lvl:"C1",th:"Environnement & énergie",es:"la depuradora",fr:"la station d'épuration",xes:"La depuradora trata el agua de toda la ciudad.",xfr:"La station d'épuration traite l'eau de toute la ville."},
+{id:"v515",lvl:"C1",th:"Environnement & énergie",es:"la energía eólica",fr:"l'énergie éolienne",xes:"La energía eólica cubre un tercio de la demanda.",xfr:"L'énergie éolienne couvre un tiers de la demande."},
+{id:"v516",lvl:"C1",th:"Environnement & énergie",es:"el ahorro energético",fr:"les économies d'énergie",xes:"El ahorro energético empieza por aislar bien la casa.",xfr:"Les économies d'énergie commencent par bien isoler la maison."},
+{id:"v517",lvl:"C1",th:"Environnement & énergie",es:"la especie en peligro de extinción",fr:"l'espèce en voie de disparition",xes:"El lince es una especie en peligro de extinción.",xfr:"Le lynx est une espèce en voie de disparition."},
+{id:"v518",lvl:"C1",th:"Environnement & énergie",es:"los residuos",fr:"les déchets (sens officiel)",xes:"Los residuos industriales se tratan por separado.",xfr:"Les déchets industriels sont traités séparément."},
+{id:"v519",lvl:"C1",th:"Environnement & énergie",es:"la transición ecológica",fr:"la transition écologique",xes:"La transición ecológica exige grandes inversiones.",xfr:"La transition écologique exige de gros investissements."},
+// --- Nuances & tournures (C1) ---
+{id:"v520",lvl:"C1",th:"Nuances & tournures",es:"de cara a",fr:"en vue de",xes:"De cara al invierno, conviene revisar la calefacción.",xfr:"En vue de l'hiver, il convient de réviser le chauffage."},
+{id:"v521",lvl:"C1",th:"Nuances & tournures",es:"a raíz de",fr:"à la suite de",xes:"A raíz de la crisis, cerraron muchas tiendas.",xfr:"À la suite de la crise, de nombreux commerces ont fermé."},
+{id:"v522",lvl:"C1",th:"Nuances & tournures",es:"en aras de",fr:"au nom de, dans l'intérêt de",xes:"Se hizo en aras de la transparencia.",xfr:"Cela a été fait au nom de la transparence."},
+{id:"v523",lvl:"C1",th:"Nuances & tournures",es:"de ahí que",fr:"d'où le fait que (+ subjonctif)",xes:"Es muy caro, de ahí que pocos lo compren.",xfr:"C'est très cher, d'où le fait que peu de gens l'achètent."},
+{id:"v524",lvl:"C1",th:"Nuances & tournures",es:"cuando menos",fr:"pour le moins",xes:"Es una decisión, cuando menos, discutible.",xfr:"C'est une décision pour le moins discutable."},
+{id:"v525",lvl:"C1",th:"Nuances & tournures",es:"a lo sumo",fr:"tout au plus",xes:"Habrá diez personas, a lo sumo.",xfr:"Il y aura dix personnes, tout au plus."},
+{id:"v526",lvl:"C1",th:"Nuances & tournures",es:"a fin de cuentas",fr:"au bout du compte",xes:"A fin de cuentas, la decisión es tuya.",xfr:"Au bout du compte, la décision t'appartient."},
+{id:"v527",lvl:"C1",th:"Nuances & tournures",es:"dar por sentado",fr:"tenir pour acquis",xes:"No des por sentado que van a aceptar.",xfr:"Ne tiens pas pour acquis qu'ils vont accepter."},
+{id:"v528",lvl:"C1",th:"Nuances & tournures",es:"hacer hincapié en",fr:"insister sur",xes:"El profesor hizo hincapié en la ortografía.",xfr:"Le professeur a insisté sur l'orthographe."},
+{id:"v529",lvl:"C1",th:"Nuances & tournures",es:"poner de manifiesto",fr:"mettre en évidence",xes:"El estudio pone de manifiesto una desigualdad clara.",xfr:"L'étude met en évidence une inégalité claire."},
+{id:"v530",lvl:"C1",th:"Nuances & tournures",es:"llevar a cabo",fr:"mener à bien, réaliser",xes:"Se llevó a cabo una reforma profunda.",xfr:"Une réforme profonde a été menée à bien."},
+{id:"v531",lvl:"C1",th:"Nuances & tournures",es:"estar a la altura",fr:"être à la hauteur",xes:"Espero estar a la altura de las circunstancias.",xfr:"J'espère être à la hauteur des circonstances."},
+{id:"v532",lvl:"C1",th:"Nuances & tournures",es:"no cabe duda",fr:"il n'y a aucun doute",xes:"No cabe duda de que es la mejor opción.",xfr:"Il n'y a aucun doute que c'est la meilleure option."},
+{id:"v533",lvl:"C1",th:"Nuances & tournures",es:"sacar a relucir",fr:"ressortir, mettre sur le tapis",xes:"Sacó a relucir un viejo problema.",xfr:"Il a ressorti un vieux problème."},
+{id:"v534",lvl:"C1",th:"Nuances & tournures",es:"a duras penas",fr:"à grand-peine",xes:"Terminó la carrera a duras penas.",xfr:"Il a terminé ses études à grand-peine."},
+// --- Rhétorique & débat (C2) ---
+{id:"v535",lvl:"C2",th:"Rhétorique & débat",es:"rebatir",fr:"réfuter",xes:"Rebatió cada argumento con datos.",xfr:"Elle a réfuté chaque argument avec des données."},
+{id:"v536",lvl:"C2",th:"Rhétorique & débat",es:"la falacia",fr:"la fallacie",xes:"Ese razonamiento es una falacia.",xfr:"Ce raisonnement est une fallacie."},
+{id:"v537",lvl:"C2",th:"Rhétorique & débat",es:"esgrimir",fr:"brandir (un argument)",xes:"Esgrimió razones de peso para negarse.",xfr:"Il a brandi des raisons de poids pour refuser."},
+{id:"v538",lvl:"C2",th:"Rhétorique & débat",es:"aducir",fr:"alléguer",xes:"Adujo motivos de salud para no asistir.",xfr:"Il a allégué des raisons de santé pour ne pas venir."},
+{id:"v539",lvl:"C2",th:"Rhétorique & débat",es:"la réplica",fr:"la réplique",xes:"Su réplica dejó a todos en silencio.",xfr:"Sa réplique a laissé tout le monde silencieux."},
+{id:"v540",lvl:"C2",th:"Rhétorique & débat",es:"zanjar",fr:"trancher, clore (un débat)",xes:"El presidente zanjó la polémica con un comunicado.",xfr:"Le président a clos la polémique par un communiqué."},
+{id:"v541",lvl:"C2",th:"Rhétorique & débat",es:"eludir",fr:"éluder",xes:"Eludió la pregunta con una sonrisa.",xfr:"Il a éludé la question avec un sourire."},
+{id:"v542",lvl:"C2",th:"Rhétorique & débat",es:"la vehemencia",fr:"la véhémence",xes:"Defendió su postura con vehemencia.",xfr:"Il a défendu sa position avec véhémence."},
+{id:"v543",lvl:"C2",th:"Rhétorique & débat",es:"matizar",fr:"nuancer",xes:"Conviene matizar esa afirmación.",xfr:"Il convient de nuancer cette affirmation."},
+{id:"v544",lvl:"C2",th:"Rhétorique & débat",es:"sortear",fr:"contourner (une difficulté)",xes:"Supo sortear las críticas con habilidad.",xfr:"Il a su contourner les critiques avec habileté."},
+{id:"v545",lvl:"C2",th:"Rhétorique & débat",es:"la elocuencia",fr:"l'éloquence",xes:"Su elocuencia convenció al público.",xfr:"Son éloquence a convaincu le public."},
+{id:"v546",lvl:"C2",th:"Rhétorique & débat",es:"tergiversar",fr:"déformer, dénaturer",xes:"Tergiversaron mis palabras en la prensa.",xfr:"Ils ont déformé mes paroles dans la presse."},
+{id:"v547",lvl:"C2",th:"Rhétorique & débat",es:"avalar",fr:"cautionner, appuyer",xes:"Varios expertos avalan este informe.",xfr:"Plusieurs experts cautionnent ce rapport."},
+{id:"v548",lvl:"C2",th:"Rhétorique & débat",es:"sostener",fr:"soutenir (une thèse)",xes:"Sostiene que la crisis era inevitable.",xfr:"Il soutient que la crise était inévitable."},
+{id:"v549",lvl:"C2",th:"Rhétorique & débat",es:"la premisa",fr:"la prémisse",xes:"Partimos de una premisa errónea.",xfr:"Nous partons d'une prémisse erronée."},
+// --- Littérature & langue (C2) ---
+{id:"v550",lvl:"C2",th:"Littérature & langue",es:"el matiz",fr:"la nuance",xes:"Hay un matiz irónico en su respuesta.",xfr:"Il y a une nuance ironique dans sa réponse."},
+{id:"v551",lvl:"C2",th:"Littérature & langue",es:"la prosa",fr:"la prose",xes:"Su prosa es limpia y precisa.",xfr:"Sa prose est limpide et précise."},
+{id:"v552",lvl:"C2",th:"Littérature & langue",es:"el desenlace",fr:"le dénouement",xes:"El desenlace de la novela me sorprendió.",xfr:"Le dénouement du roman m'a surpris."},
+{id:"v553",lvl:"C2",th:"Littérature & langue",es:"el narrador",fr:"le narrateur",xes:"El narrador cuenta la historia en primera persona.",xfr:"Le narrateur raconte l'histoire à la première personne."},
+{id:"v554",lvl:"C2",th:"Littérature & langue",es:"la trama",fr:"l'intrigue",xes:"La trama se complica en el segundo acto.",xfr:"L'intrigue se complique au deuxième acte."},
+{id:"v555",lvl:"C2",th:"Littérature & langue",es:"sobrecogedor",fr:"saisissant",xes:"Es un relato sobrecogedor.",xfr:"C'est un récit saisissant."},
+{id:"v556",lvl:"C2",th:"Littérature & langue",es:"el hilo conductor",fr:"le fil conducteur",xes:"La memoria es el hilo conductor del libro.",xfr:"La mémoire est le fil conducteur du livre."},
+{id:"v557",lvl:"C2",th:"Littérature & langue",es:"aludir",fr:"faire allusion",xes:"El autor alude a la guerra sin nombrarla.",xfr:"L'auteur fait allusion à la guerre sans la nommer."},
+{id:"v558",lvl:"C2",th:"Littérature & langue",es:"el registro",fr:"le registre (de langue)",xes:"Cambia de registro según con quién hable.",xfr:"Il change de registre selon son interlocuteur."},
+{id:"v559",lvl:"C2",th:"Littérature & langue",es:"la acepción",fr:"l'acception",xes:"La palabra tiene varias acepciones.",xfr:"Le mot a plusieurs acceptions."},
+{id:"v560",lvl:"C2",th:"Littérature & langue",es:"el neologismo",fr:"le néologisme",xes:"«Whatsappear» es un neologismo muy extendido.",xfr:"« Whatsappear » est un néologisme très répandu."},
+{id:"v561",lvl:"C2",th:"Littérature & langue",es:"la locución",fr:"la locution",xes:"«A regañadientes» es una locución adverbial.",xfr:"« A regañadientes » est une locution adverbiale."},
+{id:"v562",lvl:"C2",th:"Littérature & langue",es:"la perífrasis",fr:"la périphrase",xes:"«Ir a + infinitivo» es una perífrasis verbal.",xfr:"« Ir a + infinitif » est une périphrase verbale."},
+{id:"v563",lvl:"C2",th:"Littérature & langue",es:"el calco",fr:"le calque",xes:"Esa expresión es un calco del inglés.",xfr:"Cette expression est un calque de l'anglais."},
+{id:"v564",lvl:"C2",th:"Littérature & langue",es:"la digresión",fr:"la digression",xes:"El autor se pierde en una digresión sobre la lluvia.",xfr:"L'auteur se perd dans une digression sur la pluie."},
+// --- Proverbes & dictons (C2) ---
+{id:"v565",lvl:"C2",th:"Proverbes & dictons",es:"a caballo regalado no le mires el diente",fr:"à cheval donné, on ne regarde pas les dents",xes:"Es un regalo viejo, pero a caballo regalado no le mires el diente.",xfr:"C'est un vieux cadeau, mais à cheval donné on ne regarde pas les dents."},
+{id:"v566",lvl:"C2",th:"Proverbes & dictons",es:"más vale pájaro en mano que ciento volando",fr:"un tiens vaut mieux que deux tu l'auras",xes:"Acepta la oferta: más vale pájaro en mano que ciento volando.",xfr:"Accepte l'offre : un tiens vaut mieux que deux tu l'auras."},
+{id:"v567",lvl:"C2",th:"Proverbes & dictons",es:"en casa del herrero, cuchillo de palo",fr:"les cordonniers sont les plus mal chaussés",xes:"El electricista sin luz en casa: en casa del herrero, cuchillo de palo.",xfr:"L'électricien sans lumière chez lui : les cordonniers sont les plus mal chaussés."},
+{id:"v568",lvl:"C2",th:"Proverbes & dictons",es:"quien mucho abarca, poco aprieta",fr:"qui trop embrasse mal étreint",xes:"No aceptes tantos proyectos: quien mucho abarca, poco aprieta.",xfr:"N'accepte pas tant de projets : qui trop embrasse mal étreint."},
+{id:"v569",lvl:"C2",th:"Proverbes & dictons",es:"no por mucho madrugar amanece más temprano",fr:"rien ne sert de se presser, chaque chose en son temps",xes:"Tranquilo, no por mucho madrugar amanece más temprano.",xfr:"Du calme, rien ne sert de se presser."},
+{id:"v570",lvl:"C2",th:"Proverbes & dictons",es:"ojos que no ven, corazón que no siente",fr:"ce qu'on ne voit pas ne fait pas souffrir",xes:"Prefiere no saberlo: ojos que no ven, corazón que no siente.",xfr:"Il préfère ne pas le savoir : ce qu'on ne voit pas ne fait pas souffrir."},
+{id:"v571",lvl:"C2",th:"Proverbes & dictons",es:"al mal tiempo, buena cara",fr:"à mauvaise fortune, bon cœur",xes:"Perdimos el partido, pero al mal tiempo, buena cara.",xfr:"Nous avons perdu le match, mais à mauvaise fortune, bon cœur."},
+{id:"v572",lvl:"C2",th:"Proverbes & dictons",es:"dime con quién andas y te diré quién eres",fr:"dis-moi qui tu fréquentes et je te dirai qui tu es",xes:"Ten cuidado con esas amistades: dime con quién andas y te diré quién eres.",xfr:"Fais attention à ces fréquentations : dis-moi qui tu fréquentes et je te dirai qui tu es."},
+{id:"v573",lvl:"C2",th:"Proverbes & dictons",es:"cada oveja con su pareja",fr:"qui se ressemble s'assemble",xes:"Los dos son muy tímidos: cada oveja con su pareja.",xfr:"Ils sont tous les deux très timides : qui se ressemble s'assemble."},
+{id:"v574",lvl:"C2",th:"Proverbes & dictons",es:"el que no arriesga no gana",fr:"qui ne risque rien n'a rien",xes:"Invierte un poco: el que no arriesga no gana.",xfr:"Investis un peu : qui ne risque rien n'a rien."},
+{id:"v575",lvl:"C2",th:"Proverbes & dictons",es:"a palabras necias, oídos sordos",fr:"à sottes paroles, oreilles sourdes",xes:"No respondas a los insultos: a palabras necias, oídos sordos.",xfr:"Ne réponds pas aux insultes : à sottes paroles, oreilles sourdes."},
+{id:"v576",lvl:"C2",th:"Proverbes & dictons",es:"de tal palo, tal astilla",fr:"tel père, tel fils",xes:"Es igual de testarudo que su padre: de tal palo, tal astilla.",xfr:"Il est aussi têtu que son père : tel père, tel fils."},
+{id:"v577",lvl:"C2",th:"Proverbes & dictons",es:"más sabe el diablo por viejo que por diablo",fr:"l'expérience vaut mieux que la ruse",xes:"Escucha a tu abuela: más sabe el diablo por viejo que por diablo.",xfr:"Écoute ta grand-mère : l'expérience vaut mieux que la ruse."},
+{id:"v578",lvl:"C2",th:"Proverbes & dictons",es:"quien a buen árbol se arrima, buena sombra le cobija",fr:"qui s'appuie sur un bon arbre est bien abrité",xes:"Búscate buenos aliados: quien a buen árbol se arrima, buena sombra le cobija.",xfr:"Trouve-toi de bons alliés : qui s'appuie sur un bon arbre est bien abrité."},
+{id:"v579",lvl:"C2",th:"Proverbes & dictons",es:"en boca cerrada no entran moscas",fr:"il vaut mieux se taire",xes:"Mejor no decir nada: en boca cerrada no entran moscas.",xfr:"Mieux vaut ne rien dire : il vaut mieux se taire."},
+// --- Verbes & mots précis (C2) ---
+{id:"v580",lvl:"C2",th:"Verbes & mots précis",es:"sobrellevar",fr:"supporter, endurer",xes:"Sobrelleva la enfermedad con mucho ánimo.",xfr:"Il supporte la maladie avec beaucoup de courage."},
+{id:"v581",lvl:"C2",th:"Verbes & mots précis",es:"desempeñar",fr:"exercer, remplir (un rôle)",xes:"Desempeña un cargo de gran responsabilidad.",xfr:"Elle exerce une fonction à grande responsabilité."},
+{id:"v582",lvl:"C2",th:"Verbes & mots précis",es:"acatar",fr:"se conformer à, obéir à",xes:"Todos debemos acatar la sentencia.",xfr:"Nous devons tous nous conformer au jugement."},
+{id:"v583",lvl:"C2",th:"Verbes & mots précis",es:"desvelar",fr:"dévoiler",xes:"La prensa desveló el secreto.",xfr:"La presse a dévoilé le secret."},
+{id:"v584",lvl:"C2",th:"Verbes & mots précis",es:"atenuar",fr:"atténuer",xes:"Las cortinas atenúan la luz del mediodía.",xfr:"Les rideaux atténuent la lumière de midi."},
+{id:"v585",lvl:"C2",th:"Verbes & mots précis",es:"mermar",fr:"diminuer, réduire",xes:"La sequía mermó la cosecha.",xfr:"La sécheresse a réduit la récolte."},
+{id:"v586",lvl:"C2",th:"Verbes & mots précis",es:"subsanar",fr:"corriger, réparer (une erreur)",xes:"Hay que subsanar el error cuanto antes.",xfr:"Il faut corriger l'erreur au plus vite."},
+{id:"v587",lvl:"C2",th:"Verbes & mots précis",es:"cerciorarse",fr:"s'assurer",xes:"Cerciórate de que la puerta está cerrada.",xfr:"Assure-toi que la porte est fermée."},
+{id:"v588",lvl:"C2",th:"Verbes & mots précis",es:"dilucidar",fr:"élucider",xes:"Falta dilucidar quién tuvo la culpa.",xfr:"Il reste à élucider qui est responsable."},
+{id:"v589",lvl:"C2",th:"Verbes & mots précis",es:"desistir",fr:"renoncer",xes:"Desistió de su idea al ver el coste.",xfr:"Il a renoncé à son idée en voyant le coût."},
+{id:"v590",lvl:"C2",th:"Verbes & mots précis",es:"albergar",fr:"nourrir (un espoir), abriter",xes:"Aún alberga la esperanza de volver.",xfr:"Il nourrit encore l'espoir de revenir."},
+{id:"v591",lvl:"C2",th:"Verbes & mots précis",es:"colmar",fr:"combler",xes:"El resultado colmó todas nuestras expectativas.",xfr:"Le résultat a comblé toutes nos attentes."},
+{id:"v592",lvl:"C2",th:"Verbes & mots précis",es:"hacer mella",fr:"entamer, affecter",xes:"Las críticas hicieron mella en su ánimo.",xfr:"Les critiques ont entamé son moral."},
+{id:"v593",lvl:"C2",th:"Verbes & mots précis",es:"vislumbrar",fr:"entrevoir",xes:"Ya se vislumbra una solución.",xfr:"On entrevoit déjà une solution."},
+{id:"v594",lvl:"C2",th:"Verbes & mots précis",es:"acuciante",fr:"pressant, urgent",xes:"La falta de vivienda es un problema acuciante.",xfr:"Le manque de logements est un problème pressant."},
+// --- Espagnol familier (C2) ---
+{id:"v595",lvl:"C2",th:"Espagnol familier",es:"guay",fr:"super, cool",xes:"Esta canción es muy guay.",xfr:"Cette chanson est super."},
+{id:"v596",lvl:"C2",th:"Espagnol familier",es:"molar",fr:"plaire (familier)",xes:"Me mola tu chaqueta.",xfr:"J'aime bien ta veste."},
+{id:"v597",lvl:"C2",th:"Espagnol familier",es:"flipar",fr:"halluciner",xes:"Flipé con el final de la serie.",xfr:"J'ai halluciné devant la fin de la série."},
+{id:"v598",lvl:"C2",th:"Espagnol familier",es:"currar",fr:"bosser",xes:"Curro diez horas al día.",xfr:"Je bosse dix heures par jour."},
+{id:"v599",lvl:"C2",th:"Espagnol familier",es:"el curro",fr:"le boulot",xes:"Tengo mucho curro esta semana.",xfr:"J'ai beaucoup de boulot cette semaine."},
+{id:"v600",lvl:"C2",th:"Espagnol familier",es:"estar de mala uva",fr:"être de mauvais poil",xes:"Hoy estás de mala uva.",xfr:"Aujourd'hui, tu es de mauvais poil."},
+{id:"v601",lvl:"C2",th:"Espagnol familier",es:"pasarse de la raya",fr:"dépasser les bornes",xes:"Te has pasado de la raya con ese comentario.",xfr:"Tu as dépassé les bornes avec ce commentaire."},
+{id:"v602",lvl:"C2",th:"Espagnol familier",es:"chulo",fr:"joli, chouette (ou prétentieux)",xes:"¡Qué piso más chulo!",xfr:"Quel bel appartement !"},
+{id:"v603",lvl:"C2",th:"Espagnol familier",es:"el rollo",fr:"la barbe, le truc",xes:"Esta reunión es un rollo.",xfr:"Cette réunion est une barbe."},
+{id:"v604",lvl:"C2",th:"Espagnol familier",es:"el colega",fr:"le pote",xes:"Voy al cine con un colega.",xfr:"Je vais au cinéma avec un pote."},
+{id:"v605",lvl:"C2",th:"Espagnol familier",es:"el tío",fr:"le mec",xes:"Ese tío es muy majo.",xfr:"Ce mec est très sympa."},
+{id:"v606",lvl:"C2",th:"Espagnol familier",es:"majo",fr:"sympa",xes:"Tu vecina es muy maja.",xfr:"Ta voisine est très sympa."},
+{id:"v607",lvl:"C2",th:"Espagnol familier",es:"chungo",fr:"pourri, louche",xes:"La situación está muy chunga.",xfr:"La situation est très mauvaise."},
+{id:"v608",lvl:"C2",th:"Espagnol familier",es:"pasar de",fr:"se désintéresser de, laisser tomber",xes:"Paso de ir a esa fiesta.",xfr:"Je n'ai aucune envie d'aller à cette fête."},
+{id:"v609",lvl:"C2",th:"Espagnol familier",es:"¡qué fuerte!",fr:"c'est dingue !",xes:"¡Qué fuerte, no me lo puedo creer!",xfr:"C'est dingue, je n'arrive pas à y croire !"}
+];
+
+/* Pictogramme de chaque situation — affiché dans le choix des sections */
+var TH_ICON = {
+  "Banque & paperasses":"🏦",
+  "Chez le garagiste":"🔧",
+  "Contrôle de police":"🚓",
+  "Avis & émotions":"💬",
+  "Voisins & amis":"🤝",
+  "Téléphone & internet":"📱",
+  "Écologie & déchets":"♻",
+  "Actualité & médias":"📰",
+  "Expressions imagées":"🎭",
+  "Connecteurs & nuances":"🔗",
+  "Sorties & culture":"🎬",
+  "Argent & impôts":"📈",
+  "Carrière & entreprise":"🏢",
+  "Santé & mode de vie":"🧘",
+  "Sciences & technologie":"🔬",
+  "Politique & institutions":"🏛",
+  "Droit & justice":"⚖",
+  "Économie & finance":"💹",
+  "Médias & opinion":"📺",
+  "Environnement & énergie":"🌍",
+  "Nuances & tournures":"🎯",
+  "Rhétorique & débat":"🗣",
+  "Littérature & langue":"📚",
+  "Proverbes & dictons":"🪶",
+  "Verbes & mots précis":"🎓",
+  "Espagnol familier":"😎"
+};
+
+/* ============================================================
+   DONNÉES — Grammaire (20 leçons, B1 → C2)
+   ============================================================ */
+var GRAMMAR = [
+{id:"g11",lvl:"B1",title:"Le subjonctif présent — formation",
+ html:"<p>On part du présent de l'indicatif à la 1ère personne (« yo »), on enlève le -o, puis on ajoute les terminaisons <b>inversées</b> : verbes en -AR → -e, -es, -e, -emos, -éis, -en ; verbes en -ER/-IR → -a, -as, -a, -amos, -áis, -an. Cela conserve les irrégularités du présent : tener→tengo→<b>tenga</b>, hacer→hago→<b>haga</b>, conocer→conozco→<b>conozca</b>.</p>",
+ exercises:[
+  {type:"fill",prompt:"hablar → que yo <em>___</em>",answer:"hable",explain:"hablar (yo hablo) → hable."},
+  {type:"fill",prompt:"tener → que tú <em>___</em>",answer:"tengas",explain:"tener (yo tengo) → tengas."},
+  {type:"fill",prompt:"hacer → que nosotros <em>___</em>",answer:"hagamos",explain:"hacer (yo hago) → hagamos."},
+  {type:"fill",prompt:"vivir → que ellos <em>___</em>",answer:"vivan",explain:"vivir (yo vivo) → vivan."},
+  {type:"qcm",prompt:"Le subjonctif présent des verbes en -ER se termine, à la 1ère personne, en :",options:["-a","-e","-o"],answer:0,explain:"Les verbes en -ER/-IR prennent les terminaisons du subjonctif en -a (inversion)."}
+]},
+{id:"g12",lvl:"B1",title:"Le subjonctif après le doute, le désir et le sentiment",
+ html:"<p>On emploie <b>que + subjonctif</b> après des expressions de volonté (querer que), de sentiment (alegrarse de que, es una pena que), de doute (dudar que) ou de nécessité (es importante que) — quand le sujet change entre les deux propositions. Sans changement de sujet, on utilise l'infinitif : « Quiero salir » (pas de subjonctif) vs « Quiero que salgas » (subjonctif).</p>",
+ exercises:[
+  {type:"qcm",prompt:"Espero que tú ___ (venir) a la fiesta.",options:["vienes","vengas"],answer:1,explain:"« esperar que » + changement de sujet → subjonctif : vengas."},
+  {type:"qcm",prompt:"Creo que ella ___ (tener) razón. (certitude, pas de doute)",options:["tiene","tenga"],answer:0,explain:"« creer que » à l'affirmatif exprime une certitude → indicatif."},
+  {type:"qcm",prompt:"Dudo que él ___ (llegar) a tiempo.",options:["llega","llegue"],answer:1,explain:"« dudar que » exprime le doute → subjonctif."},
+  {type:"qcm",prompt:"Es importante que vosotros ___ (estudiar) todos los días.",options:["estudiáis","estudiéis"],answer:1,explain:"« es importante que » → subjonctif : estudiéis."},
+  {type:"fill",prompt:"Ojalá <em>___</em> (hacer) buen tiempo mañana.",answer:"haga",explain:"« ojalá » est toujours suivi du subjonctif : haga."}
+]},
+{id:"g13",lvl:"B1",title:"Le conditionnel simple",
+ html:"<p>Même radical que le futur (infinitif ou radical irrégulier) + terminaisons <b>-ía, -ías, -ía, -íamos, -íais, -ían</b>. Usages : politesse (« Me gustaría... »), conseil (« Yo que tú, hablaría con ella »), hypothèse.</p>",
+ exercises:[
+  {type:"fill",prompt:"Me <em>___</em> (gustar) un café, por favor. (politesse)",answer:"gustaría",explain:"gustar → gustaría (conditionnel de politesse)."},
+  {type:"fill",prompt:"Yo que tú, le <em>___</em> (decir) la verdad. (irrégulier)",answer:"diría",explain:"decir → diría (radical irrégulier dir-)."},
+  {type:"fill",prompt:"¿<em>___</em> (poder/tú) ayudarme un momento? (irrégulier, politesse)",answer:"podrías",explain:"poder → podrías (radical irrégulier podr-)."},
+  {type:"fill",prompt:"Con más tiempo, nosotros <em>___</em> (viajar) por todo el país.",answer:"viajaríamos",explain:"viajar → viajaríamos."},
+  {type:"qcm",prompt:"Le conditionnel se forme en ajoutant les terminaisons à :",options:["l'infinitif (ou radical irrégulier)","au radical du présent"],answer:0,explain:"Comme le futur, le conditionnel s'appuie sur l'infinitif ou le radical irrégulier."}
+]},
+{id:"g14",lvl:"B1",title:"Por vs Para",
+ html:"<p><b>PARA</b> : destination, but, destinataire, délai/échéance, opinion personnelle (« para mí »). <b>POR</b> : cause/motif, moyen, échange, durée approximative, lieu de passage (« por »). Ex : « Este regalo es <b>para</b> ti » (destinataire) vs « Gracias <b>por</b> el regalo » (motif) ; « Salgo <b>para</b> Madrid » (destination) vs « Paso <b>por</b> Madrid » (passage).</p>",
+ exercises:[
+  {type:"qcm",prompt:"Este regalo es ___ ti.",options:["por","para"],answer:1,explain:"Destinataire → PARA."},
+  {type:"qcm",prompt:"Gracias ___ tu ayuda.",options:["por","para"],answer:0,explain:"Motif/cause → POR."},
+  {type:"qcm",prompt:"Necesito el informe ___ el lunes. (échéance)",options:["por","para"],answer:1,explain:"Délai/échéance → PARA."},
+  {type:"qcm",prompt:"Caminamos ___ el parque. (lieu de passage)",options:["por","para"],answer:0,explain:"Lieu de passage → POR."},
+  {type:"qcm",prompt:"Cambié mi coche ___ una moto. (échange)",options:["por","para"],answer:0,explain:"Échange → POR."}
+]},
+{id:"g15",lvl:"B1",title:"Les pronoms relatifs",
+ html:"<p><b>que</b> : personnes et choses, le plus courant. <b>quien/quienes</b> : personnes, souvent après une préposition. <b>el que / la que / los que / las que</b> : s'accordent en genre/nombre, utiles après une préposition ou pour insister. <b>lo que</b> : relatif neutre pour une idée générale (« ce que »).</p>",
+ exercises:[
+  {type:"fill",prompt:"La persona <em>___</em> me ayudó es mi vecina.",answer:"que",explain:"« que » : relatif le plus général, sujet ici."},
+  {type:"fill",prompt:"El chico con <em>___</em> hablé es muy simpático. (personne + préposition)",answer:"quien",explain:"Après une préposition et pour une personne, « quien » convient bien."},
+  {type:"fill",prompt:"No entiendo <em>___</em> dices. (idée générale)",answer:"lo que",explain:"« lo que » : relatif neutre pour une idée, pas un nom précis."},
+  {type:"qcm",prompt:"« Los libros ___ compré son interesantes » (que j'ai achetés) :",options:["que","quienes"],answer:0,explain:"Pour une chose (los libros), on utilise « que »."},
+  {type:"fill",prompt:"Esta es la razón por <em>___</em> me fui. (la raison pour laquelle, féminin)",answer:"la que",explain:"« por la que » : forme accordée au féminin (la razón)."}
+]},
+{id:"g16",lvl:"B2",title:"Le subjonctif imparfait et les phrases hypothétiques",
+ html:"<p>Formation : 3e personne du pluriel du passé simple, moins <b>-ron</b>, + terminaisons <b>-ra, -ras, -ra, -ramos (avec accent), -rais, -ran</b>. Ex : hablaron → habla<b>ra</b> ; tuvieron → tuvie<b>ra</b>. Structure hypothétique irréelle : <b>Si + imparfait du subjonctif, conditionnel</b> : « Si tuviera dinero, viajaría por el mundo » (Si j'avais de l'argent, je voyagerais).</p>",
+ exercises:[
+  {type:"fill",prompt:"Si yo <em>___</em> (tener) más tiempo, aprendería a tocar la guitarra.",answer:"tuviera",explain:"tener → tuvieron → tuviera."},
+  {type:"fill",prompt:"Si ella <em>___</em> (saber) la verdad, no diría eso.",answer:"supiera",explain:"saber → supieron → supiera."},
+  {type:"fill",prompt:"Si nosotros <em>___</em> (poder), te ayudaríamos.",answer:"pudiéramos",explain:"poder → pudieron → pudiéramos (accent sur pudié-)."},
+  {type:"qcm",prompt:"La structure correcte pour une hypothèse irréelle au présent est :",options:["Si + imparfait du subjonctif, conditionnel","Si + présent, futur"],answer:0,explain:"« Si + imperfecto de subjuntivo, condicional » exprime une hypothèse irréelle."},
+  {type:"fill",prompt:"Si <em>___</em> (hacer) buen tiempo, iríamos a la playa.",answer:"hiciera",explain:"hacer → hicieron → hiciera."}
+]},
+{id:"g17",lvl:"B2",title:"Le style indirect (discours rapporté)",
+ html:"<p>Quand on rapporte une parole au passé, plusieurs éléments changent : présent → imparfait ; passé composé/indefinido → plus-que-parfait ; futur → conditionnel ; « hoy » → « ese día » ; « mañana » → « al día siguiente ». Ex : Dijo: « Estoy cansado » → Dijo que <b>estaba</b> cansado. Dijo: « Vendré mañana » → Dijo que <b>vendría</b> al día siguiente.</p>",
+ exercises:[
+  {type:"fill",prompt:"Dijo: « Tengo hambre. » → Dijo que <em>___</em> hambre.",answer:"tenía",explain:"Présent → imparfait : tengo → tenía."},
+  {type:"fill",prompt:"Dijo: « Iré a la fiesta. » → Dijo que <em>___</em> a la fiesta.",answer:"iría",explain:"Futur → conditionnel : iré → iría."},
+  {type:"fill",prompt:"Dijo: « Ya comí. » → Dijo que ya <em>___</em> comido.",answer:"había",explain:"Passé composé/indefinido → plus-que-parfait : había comido."},
+  {type:"qcm",prompt:"« hoy » devient, au discours rapporté :",options:["ese día","al día siguiente","ayer"],answer:0,explain:"« hoy » → « ese día » quand on rapporte une parole plus tard."},
+  {type:"fill",prompt:"Dijo: « Puedo ayudarte. » → Dijo que <em>___</em> ayudarme.",answer:"podía",explain:"Présent → imparfait : puedo → podía."}
+]},
+{id:"g18",lvl:"B2",title:"La voix passive et le « se » passif/impersonnel",
+ html:"<p><b>Voix passive</b> : ser + participe passé, qui s'accorde en genre et en nombre avec le sujet (« La novela fue escrita por Cervantes »). <b>Se passif</b> : plus naturel en espagnol quand l'agent importe peu, le verbe s'accorde avec la chose (« Se venden pisos » = des appartements sont vendus). <b>Se impersonnel</b> : sujet indéterminé, verbe toujours au singulier (« Se dice que va a llover » ; « Se vive bien aquí »).</p>",
+ exercises:[
+  {type:"fill",prompt:"La novela <em>___</em> (ser) escrita en 1950.",answer:"fue",explain:"Voix passive : ser (indefinido) + participe : fue escrita."},
+  {type:"qcm",prompt:"« On vend des maisons ici » (se passif, pluriel) :",options:["Se vende casas aquí.","Se venden casas aquí."],answer:1,explain:"Le verbe s'accorde avec « casas » (pluriel) : se venden."},
+  {type:"fill",prompt:"<em>___</em> dice que el nuevo restaurante es excelente. (se impersonnel)",answer:"Se",explain:"« Se dice que » : tournure impersonnelle très courante."},
+  {type:"qcm",prompt:"Dans « se impersonnel », le verbe est toujours :",options:["au singulier","accordé au sujet"],answer:0,explain:"Le « se » impersonnel n'a pas de sujet réel : le verbe reste singulier."},
+  {type:"fill",prompt:"Aquí <em>___</em> (hablar) español e inglés. (se passif)",answer:"se habla",explain:"« se habla » : tournure très fréquente sur les panneaux/enseignes."}
+]},
+{id:"g19",lvl:"B2",title:"Connecteurs discursifs avancés",
+ html:"<p>Pour structurer une argumentation à l'oral et à l'écrit : opposition (<i>sin embargo, no obstante, a pesar de</i>), cause/conséquence (<i>por consiguiente, ya que, debido a</i>), reformulation (<i>es decir, dicho de otro modo</i>), ajout d'idée (<i>además, asimismo</i>), conclusion (<i>en resumen, en definitiva</i>).</p>",
+ exercises:[
+  {type:"qcm",prompt:"« Il pleut ; ___ , nous sortirons quand même. » (opposition)",options:["sin embargo","por consiguiente"],answer:0,explain:"Opposition → sin embargo (cependant)."},
+  {type:"qcm",prompt:"« Il n'a pas étudié ; ___ , il a échoué. » (conséquence)",options:["es decir","por consiguiente"],answer:1,explain:"Conséquence → por consiguiente (par conséquent)."},
+  {type:"qcm",prompt:"« Est végétarien, ___ , il ne mange pas de viande. » (reformulation)",options:["es decir","además"],answer:0,explain:"Reformulation → es decir (c'est-à-dire)."},
+  {type:"qcm",prompt:"« ___ , le projet a été un succès. » (conclusion)",options:["en resumen","en cuanto a"],answer:0,explain:"Conclusion → en resumen (en résumé)."},
+  {type:"fill",prompt:"Salimos <em>___</em> la lluvia. (malgré)",answer:"a pesar de",explain:"« a pesar de » = malgré."}
+]},
+{id:"g20",lvl:"B2",title:"Expressions idiomatiques et locutions figées",
+ html:"<p>Le niveau B2 exige de reconnaître et d'utiliser des expressions idiomatiques courantes — impossibles à traduire mot à mot. Retrouve leur sens dans les exercices ci-dessous (elles sont aussi disponibles dans le vocabulaire « Expressions idiomatiques »).</p>",
+ exercises:[
+  {type:"qcm",prompt:"« Estar en las nubes » signifie :",options:["Être dans la lune","Être très heureux","Voler en avion"],answer:0,explain:"« estar en las nubes » = être distrait, dans la lune."},
+  {type:"qcm",prompt:"« Costar un ojo de la cara » signifie :",options:["Être douloureux","Coûter très cher","Être dangereux"],answer:1,explain:"= coûter les yeux de la tête, être très cher."},
+  {type:"qcm",prompt:"« Meter la pata » signifie :",options:["Faire une gaffe","Marcher vite","Se blesser au pied"],answer:0,explain:"= faire une gaffe, une bévue."},
+  {type:"fill",prompt:"Ponerse las <em>___</em> (se bouger, s'y mettre sérieusement)",answer:"pilas",explain:"« ponerse las pilas » = se mettre les piles, au sens figuré : se motiver."},
+  {type:"qcm",prompt:"« Ser pan comido » signifie :",options:["Être du gâteau, très facile","Avoir déjà mangé","Être rassasié"],answer:0,explain:"= être du pain déjà mangé → une chose très facile."}
+]}
+,
+{id:"g21",lvl:"C1",title:"Les concessives : aunque, por más que, por muy… que",
+ html:"<p><b>Aunque + indicatif</b> : fait réel ou connu (« Aunque llueve, salgo » — il pleut, je sors quand même). <b>Aunque + subjonctif</b> : hypothèse, fait à venir ou fait admis sans importance (« Aunque llueva, saldré » — même s'il pleut). Même logique avec <b>por más que / por mucho que / por muy + adjectif + que</b> : subjonctif pour une hypothèse ou une supposition, indicatif pour un fait constaté (« Por mucho que estudia, no aprueba » — constat ; « Por mucho que estudies, no aprobarás » — supposition).</p>",
+ exercises:[
+  {type:"fill",prompt:"Aunque <em>___</em> (llover) mañana, iremos al campo. (hypothèse)",answer:"llueva",explain:"Événement futur incertain → subjonctif : llover → llueva."},
+  {type:"qcm",prompt:"« Aunque está enfermo, viene a trabajar » : le verbe est à l'indicatif parce que…",options:["c'est un fait réel","c'est une hypothèse"],answer:0,explain:"Fait constaté → indicatif ; hypothèse → subjonctif."},
+  {type:"fill",prompt:"Por mucho que <em>___</em> (tú, insistir), no cambiaré de opinión.",answer:"insistas",explain:"Supposition → subjonctif : insistir → insistas."},
+  {type:"fill",prompt:"Por muy cansado que <em>___</em> (él, estar), siempre nos ayuda.",answer:"esté",explain:"« por muy… que » + subjonctif : esté."},
+  {type:"qcm",prompt:"« Même si tu me le demandes cent fois, je dirai non » (hypothèse) :",options:["Aunque me lo pides cien veces, diré que no.","Aunque me lo pidas cien veces, diré que no."],answer:1,explain:"Hypothèse sur l'avenir → subjonctif : pidas."}
+]},
+{id:"g22",lvl:"C1",title:"Le plus-que-parfait du subjonctif : regrets et hypothèses passées",
+ html:"<p>Formation : <b>hubiera / hubiese</b> (les deux formes sont correctes) + participe passé : « hubiera sabido ». Pour une hypothèse impossible dans le passé : <b>Si + pluscuamperfecto de subjuntivo, condicional compuesto</b> : « Si lo hubiera sabido, habría venido » (Si je l'avais su, je serais venu). Pour un regret : <b>ojalá + hubiera + participe</b> : « Ojalá hubiera estudiado más ».</p>",
+ exercises:[
+  {type:"fill",prompt:"Si lo hubiera sabido, te <em>___</em> avisado.",answer:"habría",explain:"Conditionnel composé : habría avisado."},
+  {type:"fill",prompt:"Ojalá <em>___</em> estudiado más en el instituto. (regret)",answer:"hubiera|hubiese",explain:"Regret sur le passé : ojalá + hubiera/hubiese + participe."},
+  {type:"qcm",prompt:"« Si j'avais su, je n'y serais pas allé » :",options:["Si supiera, no habría ido.","Si hubiera sabido, no habría ido."],answer:1,explain:"Hypothèse passée irréelle : si + hubiera + participe, habría + participe."},
+  {type:"qcm",prompt:"Après « hubiera » on emploie :",options:["l'infinitif","le participe passé"],answer:1,explain:"hubiera + participe : hubiera hecho, hubiera dicho…"},
+  {type:"fill",prompt:"Si no <em>___</em> perdido el tren, habría llegado a tiempo.",answer:"hubiera|hubiese",explain:"si + hubiera/hubiese + participe."}
+]},
+{id:"g23",lvl:"C1",title:"Les périphrases verbales",
+ html:"<p>Elles nuancent le déroulement de l'action. <b>Acabar de + inf.</b> : venir de (« Acabo de llegar »). <b>Llevar + gérondif</b> : durée (« Llevo tres años estudiando español »). <b>Seguir + gérondif</b> : continuer (« Sigue lloviendo »). <b>Volver a + inf.</b> : refaire (« Volvió a llamar »). <b>Dejar de + inf.</b> : cesser. <b>Soler + inf.</b> : avoir l'habitude. <b>Echarse a + inf.</b> : se mettre à, brusquement (« Se echó a reír »).</p>",
+ exercises:[
+  {type:"qcm",prompt:"« Il vient de partir » :",options:["Acaba de irse.","Deja de irse."],answer:0,explain:"acabar de + infinitif = venir de."},
+  {type:"fill",prompt:"Llevo tres años <em>___</em> español. (j'étudie depuis trois ans)",answer:"estudiando",explain:"llevar + gérondif exprime la durée."},
+  {type:"fill",prompt:"Ayer <em>___</em> a llover. (il s'est remis à pleuvoir)",answer:"volvió",explain:"volver a + infinitif = refaire ; ici, indefinido : volvió a llover."},
+  {type:"qcm",prompt:"« Siguen viviendo aquí » signifie :",options:["Ils vivent encore ici","Ils ont arrêté de vivre ici"],answer:0,explain:"seguir + gérondif = continuer à."},
+  {type:"fill",prompt:"Mi abuelo <em>___</em> levantarse a las seis. (a l'habitude de)",answer:"suele",explain:"soler + infinitif = avoir l'habitude de."}
+]},
+{id:"g24",lvl:"C1",title:"Les pronoms : « se » accidentel et doubles pronoms",
+ html:"<p><b>Se accidentel</b> : pour dire que l'action « arrive » à quelqu'un, sans faute volontaire : « Se me olvidó la llave » (la clé m'est sortie de l'esprit), « Se le cayó el móvil », « Se nos rompió el coche ». Le verbe s'accorde avec la chose, la personne concernée est marquée par me/te/le/nos/os/les. <b>Doubles pronoms</b> : l'ordre est toujours <b>indirect + direct</b> (« Me lo dijo »), et <b>le/les + lo/la</b> devient <b>se lo/se la</b> (« Se lo di »). Avec l'impératif ou l'infinitif, les pronoms se soudent au verbe : « Dámelo », « Quiero dártelo ».</p>",
+ exercises:[
+  {type:"qcm",prompt:"« Les clés m'ont échappé de l'esprit » (involontaire) :",options:["Olvidé las llaves.","Se me olvidaron las llaves."],answer:1,explain:"Tournure accidentelle : se me olvidaron (le verbe s'accorde avec « las llaves »)."},
+  {type:"fill",prompt:"Le di el libro a Ana → <em>___</em> lo di.",answer:"se",explain:"le + lo devient se lo."},
+  {type:"fill",prompt:"Se me <em>___</em> el móvil. (il m'est tombé, cassé : romper, indefinido)",answer:"rompió",explain:"Tournure accidentelle : se me rompió el móvil."},
+  {type:"qcm",prompt:"L'ordre correct des pronoms est :",options:["Me lo dijo.","Lo me dijo."],answer:0,explain:"Toujours indirect (me) avant direct (lo)."},
+  {type:"fill",prompt:"Dá<em>___</em>, por favor. (donne-le-moi : le libro)",answer:"melo",explain:"Impératif : dá + me + lo → dámelo."}
+]},
+{id:"g25",lvl:"C1",title:"Les conjonctions à subjonctif : a menos que, en caso de que, de ahí que…",
+ html:"<p>Ces conjonctions exigent le subjonctif : <b>a menos que / a no ser que</b> (à moins que), <b>con tal de que</b> (pourvu que), <b>en caso de que</b> (au cas où), <b>siempre y cuando</b> (à condition que), <b>de ahí que</b> (d'où le fait que), <b>no sea que</b> (de peur que, au cas où : « Llévate el paraguas, no sea que llueva »), <b>para que / a fin de que</b> (afin que), <b>antes de que</b> (avant que).</p>",
+ exercises:[
+  {type:"fill",prompt:"Iré a la fiesta a menos que <em>___</em> (llover).",answer:"llueva",explain:"a menos que + subjonctif : llueva."},
+  {type:"qcm",prompt:"« En caso de que » est suivi :",options:["du subjonctif","toujours de l'indicatif"],answer:0,explain:"en caso de que + subjonctif."},
+  {type:"fill",prompt:"Llévate el paraguas, no <em>___</em> que llueva. (au cas où)",answer:"sea",explain:"no sea que + subjonctif."},
+  {type:"fill",prompt:"Es muy caro, de ahí <em>___</em> pocos lo compren.",answer:"que",explain:"de ahí que + subjonctif."},
+  {type:"qcm",prompt:"« Te ayudaré con tal de que me lo pidas » : le verbe après « con tal de que » est :",options:["pidas (subjonctif)","pides (indicatif)"],answer:0,explain:"con tal de que + subjonctif."}
+]},
+{id:"g26",lvl:"C2",title:"Futur et conditionnel de conjecture",
+ html:"<p>Le <b>futur</b> sert à faire une supposition sur le <b>présent</b> : « Serán las diez » (il doit être dix heures), « ¿Dónde estará Pedro? » (où peut bien être Pedro ?). Le <b>futur composé</b> supposé sur le <b>passé récent</b> : « Ya habrá llegado » (il sera déjà arrivé). Le <b>conditionnel</b> fait une supposition sur le <b>passé</b> : « Tendría unos cuarenta años » (il devait avoir une quarantaine d'années), « Habría cien personas » (il devait y avoir cent personnes).</p>",
+ exercises:[
+  {type:"qcm",prompt:"« Serán las tres » signifie :",options:["Il doit être trois heures","Il sera trois heures demain"],answer:0,explain:"Futur de conjecture sur le présent."},
+  {type:"fill",prompt:"Ayer <em>___</em> unas cien personas en la sala. (il devait y avoir ; haber au conditionnel)",answer:"habría",explain:"Conditionnel de conjecture sur le passé : habría."},
+  {type:"fill",prompt:"No contesta; ya <em>___</em> acostado. (il s'est sans doute couché)",answer:"se habrá",explain:"Futur composé de conjecture : se habrá acostado."},
+  {type:"qcm",prompt:"« Tendría unos cuarenta años » signifie :",options:["Il devait avoir une quarantaine d'années","Il aura quarante ans"],answer:0,explain:"Conditionnel de conjecture, tourné vers le passé."},
+  {type:"fill",prompt:"¿Dónde <em>___</em> mis gafas? (où peuvent-elles bien être ; estar au futur)",answer:"estarán",explain:"Futur de conjecture : ¿Dónde estarán mis gafas?"}
+]},
+{id:"g27",lvl:"C2",title:"Le subjonctif redoublé : « digan lo que digan »",
+ html:"<p>Formule figée à subjonctif répété, pour dire que rien n'y changera : <b>pase lo que pase</b> (quoi qu'il arrive), <b>digan lo que digan</b> (quoi qu'on dise), <b>cueste lo que cueste</b> (à tout prix), <b>sea como sea</b> (d'une façon ou d'une autre), <b>sea lo que sea</b> (quoi que ce soit), <b>venga quien venga</b> (qui que ce soit qui vienne), <b>vayas donde vayas</b> (où que tu ailles).</p>",
+ exercises:[
+  {type:"fill",prompt:"<em>___</em> lo que pase, no me rendiré. (quoi qu'il arrive)",answer:"pase",explain:"Pase lo que pase : subjonctif présent répété."},
+  {type:"fill",prompt:"Digan lo que <em>___</em>, yo seguiré mi camino.",answer:"digan",explain:"Le verbe est répété au même mode : digan lo que digan."},
+  {type:"qcm",prompt:"« Cueste lo que cueste » signifie :",options:["À tout prix","Ça coûte très cher"],answer:0,explain:"Formule concessive : peu importe le coût."},
+  {type:"fill",prompt:"Sea <em>___</em> sea, tenemos que terminarlo hoy.",answer:"como",explain:"« sea como sea » = d'une façon ou d'une autre."},
+  {type:"qcm",prompt:"Quel mode dans « venga quien venga » ?",options:["Subjonctif","Indicatif"],answer:0,explain:"Ces formules sont toujours au subjonctif."}
+]},
+{id:"g28",lvl:"C2",title:"« Lo » + adjectif, « lo de », « cuanto más… más »",
+ html:"<p><b>Lo + adjectif</b> nomme une qualité en général : « Lo bueno de vivir aquí es el clima » (ce qui est bien…). <b>Lo + adjectif + que</b> exprime l'intensité : « No sabes lo difícil que fue » (à quel point). <b>Lo de + nom</b> renvoie à une affaire connue : « Lo de ayer fue increíble » (ce qui s'est passé hier). Pour la proportionnalité : <b>cuanto más… (tanto) más</b> : « Cuanto más lo pienso, menos me gusta » ; « Cuanto antes, mejor » (le plus tôt sera le mieux).</p>",
+ exercises:[
+  {type:"fill",prompt:"<em>___</em> bueno de este barrio es que es tranquilo.",answer:"lo",explain:"Lo + adjectif : lo bueno = ce qui est bien."},
+  {type:"fill",prompt:"Cuanto más lo pienso, <em>___</em> me gusta la idea. (moins)",answer:"menos",explain:"cuanto más… menos : proportion inverse."},
+  {type:"qcm",prompt:"« Lo de ayer » signifie :",options:["Ce qui s'est passé hier, l'affaire d'hier","Le jour d'hier"],answer:0,explain:"« lo de » renvoie à une affaire déjà connue des interlocuteurs."},
+  {type:"fill",prompt:"No sabes <em>___</em> difícil que fue. (à quel point)",answer:"lo",explain:"lo + adjectif + que : intensité."},
+  {type:"qcm",prompt:"« Cuanto antes, mejor » signifie :",options:["Le plus tôt sera le mieux","Avant que ce soit mieux"],answer:0,explain:"Tournure comparative proportionnelle."}
+]},
+{id:"g29",lvl:"C2",title:"Participe absolu, « al + infinitif » et registre écrit",
+ html:"<p>Le <b>participe absolu</b> remplace une subordonnée temporelle et s'accorde avec le nom : « Terminada la reunión, salimos » (une fois la réunion terminée) ; « Concluidas las obras, la calle reabrió ». Autres tournures du registre soigné : <b>al + infinitif</b> (« Al llegar, vi la luz encendida » — en arrivant), <b>de + infinitif</b> pour une hypothèse (« De haberlo sabido, habría venido » — si j'avais su), <b>dicho esto</b> (cela dit), <b>una vez + participe</b> (« una vez terminado el trabajo »).</p>",
+ exercises:[
+  {type:"qcm",prompt:"« Terminada la reunión, salimos » signifie :",options:["Une fois la réunion terminée, nous sommes sortis","La réunion terminera, nous sortirons"],answer:0,explain:"Participe absolu = subordonnée temporelle."},
+  {type:"fill",prompt:"<em>___</em> haberlo sabido, habría venido antes. (si j'avais su)",answer:"de",explain:"de + infinitif composé = si + plus-que-parfait."},
+  {type:"fill",prompt:"<em>___</em> llegar a casa, me di cuenta de que faltaba la llave. (en arrivant)",answer:"al",explain:"al + infinitif = au moment de."},
+  {type:"qcm",prompt:"Le participe absolu s'accorde :",options:["avec le nom qui suit","toujours au masculin singulier"],answer:0,explain:"Terminadas las obras, terminado el trabajo : accord en genre et en nombre."},
+  {type:"fill",prompt:"Terminad<em>___</em> las obras, la calle se reabrió. (terminaison)",answer:"as",explain:"« las obras » : féminin pluriel → terminadas."}
+]},
+{id:"g30",lvl:"C2",title:"Pièges de l'écrit : sino, porque, aún, por qué…",
+ html:"<p><b>Sino</b> (mais, après une négation : « No quiero café, sino té ») ≠ <b>si no</b> (« Si no vienes, me voy »). <b>Sino que</b> devant un verbe conjugué (« No me lo dijo, sino que me mintió »). <b>Por qué</b> (interrogatif : « ¿Por qué no vienes? »), <b>porque</b> (parce que), <b>porqué</b> (nom : « el porqué de su decisión »), <b>por que</b> (préposition + relatif). <b>Aún</b> avec accent = encore, toujours (« Aún no ha llegado ») ; <b>aun</b> sans accent = même (« Aun así, voy »).</p>",
+ exercises:[
+  {type:"fill",prompt:"No quiero café, <em>___</em> té. (mais)",answer:"sino",explain:"Après une négation, « mais » se dit sino."},
+  {type:"qcm",prompt:"« ¿___ no vienes ? » (question)",options:["Por qué","Porque"],answer:0,explain:"Interrogatif en deux mots avec accent sur « qué »."},
+  {type:"qcm",prompt:"« ___ no ha llegado » (pas encore) :",options:["Aún","Aun"],answer:0,explain:"« Aún » avec accent = todavía (encore)."},
+  {type:"fill",prompt:"No me dijo la verdad, <em>___</em> que me mintió. (mais que)",answer:"sino",explain:"sino que + verbe conjugué."},
+  {type:"fill",prompt:"Me pregunto el <em>___</em> de su decisión. (le pourquoi, nom)",answer:"porqué",explain:"Nom : el porqué (en un mot, avec accent)."}
+]}
+];
+
+/* Phrases affichées sur le tableau de bord et pendant la respiration */
+var PHRASES = [
+{es:"Poco a poco se llega lejos.",fr:"Petit à petit, on va loin."},
+{es:"No hay atajo sin trabajo.",fr:"Il n'y a pas de raccourci sans travail."},
+{es:"Hoy es un buen día para aprender algo nuevo.",fr:"Aujourd'hui est un bon jour pour apprendre quelque chose."},
+{es:"El que la sigue, la consigue.",fr:"Qui persévère finit par réussir."},
+{es:"Cada día es una nueva oportunidad.",fr:"Chaque jour est une nouvelle opportunité."},
+{es:"Respira hondo y sigue adelante.",fr:"Respire profondément et avance."},
+{es:"La constancia vence lo que la dicha no alcanza.",fr:"La persévérance triomphe là où la chance échoue."},
+{es:"Aprender un idioma es abrir una puerta nueva.",fr:"Apprendre une langue, c'est ouvrir une nouvelle porte."},
+{es:"Con calma también se llega lejos.",fr:"Avec calme, on va loin aussi."},
+{es:"Un poco cada día vale más que mucho de vez en cuando.",fr:"Un peu chaque jour vaut mieux que beaucoup de temps en temps."}
+];
+
+/* Situations de la vie quotidienne, dans l'ordre du lexique, avec le niveau de leurs premiers mots */
+var THEMES=[];
+var THEME_LEVEL={};
+for(var i=0;i<VOCAB.length;i++){
+  var w=VOCAB[i];
+  if(THEMES.indexOf(w.th)===-1){ THEMES.push(w.th); THEME_LEVEL[w.th]=w.lvl; }
+}
+
+/* ============================================================
+   CONSTANTES APP
+   ============================================================ */
+var LEVELS=["B1","B2","C1","C2"];
+var LEVEL_NAME={B1:"Intermédiaire",B2:"Avancé",C1:"Autonome",C2:"Maîtrise"};
+/* Ancien barème d'XP — ne sert plus qu'à retrouver le niveau d'une progression enregistrée avant son abandon */
+var LEGACY_XP_THRESHOLDS={B1:0,B2:900,C1:1700,C2:2500};
+var BOX_INTERVALS=[1,2,4,9,18,40];
+var MASTERED_BOX=3; /* à partir de la boîte 3, le mot compte comme retenu */
+var VOCAB_BY_ID={};
+VOCAB.forEach(function(w){VOCAB_BY_ID[w.id]=w;});
+var VOCAB_BY_LEVEL={};
+VOCAB.forEach(function(w){ (VOCAB_BY_LEVEL[w.lvl]=VOCAB_BY_LEVEL[w.lvl]||[]).push(w); });
+var GRAMMAR_BY_ID={};
+GRAMMAR.forEach(function(g){GRAMMAR_BY_ID[g.id]=g;});
+
+/* ============================================================
+   UTILITAIRES
+   ============================================================ */
+function pad2(n){return n<10?"0"+n:""+n;}
+function todayStr(){var d=new Date();return d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate());}
+function dateFromStr(s){var p=s.split("-");return new Date(parseInt(p[0],10),parseInt(p[1],10)-1,parseInt(p[2],10));}
+function addDaysStr(s,n){var d=dateFromStr(s);d.setDate(d.getDate()+n);return d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate());}
+function dayDiff(a,b){return Math.round((dateFromStr(b)-dateFromStr(a))/86400000);}
+function norm(s){return (s||"").toString().trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ");}
+function escapeHtml(s){return (s+"").replace(/[&<>]/g,function(c){return c==="&"?"&amp;":c==="<"?"&lt;":"&gt;";});}
+/* Distance de Levenshtein \u2014 pour d\u00e9tecter une r\u00e9ponse \u00ab presque correcte \u00bb (faute de frappe) */
+function levenshtein(a,b){
+  a=a||""; b=b||"";
+  var m=a.length,n=b.length;
+  if(!m) return n;
+  if(!n) return m;
+  var prev=[]; for(var j=0;j<=n;j++) prev[j]=j;
+  for(var i=1;i<=m;i++){
+    var cur=[i];
+    for(var j2=1;j2<=n;j2++){
+      cur[j2]=Math.min(prev[j2]+1, cur[j2-1]+1, prev[j2-1]+(a[i-1]===b[j2-1]?0:1));
+    }
+    prev=cur;
+  }
+  return prev[n];
+}
+function fmtTime(sec){sec=Math.max(0,Math.round(sec));return Math.floor(sec/60)+":"+pad2(sec%60);}
+function shuffle(arr){var a=arr.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function levelIndex(lvl){return LEVELS.indexOf(lvl);}
+function currentLevel(){ return levelIndex(state.level)===-1 ? LEVELS[0] : state.level; }
+/* Conversion d'une ancienne progression en XP vers un niveau */
+function legacyLevelFromXp(xp){
+  var lvl=LEVELS[0];
+  for(var i=0;i<LEVELS.length;i++){ if(xp>=LEGACY_XP_THRESHOLDS[LEVELS[i]]) lvl=LEVELS[i]; }
+  return lvl;
+}
+function isMastered(id){ var s=state.srs[id]; return !!(s && s.box>=MASTERED_BOX); }
+/* Progression du niveau en cours : mots retenus / mots à voir pour le compléter */
+function levelProgress(){
+  var lvl=currentLevel();
+  var items=VOCAB_BY_LEVEL[lvl]||[];
+  var learned=0;
+  for(var i=0;i<items.length;i++){ if(isMastered(items[i].id)) learned++; }
+  return {
+    lvl:lvl, learned:learned, total:items.length,
+    remaining:Math.max(0,items.length-learned),
+    pct: items.length?Math.round((learned/items.length)*100):0,
+    isMax: lvl===LEVELS[LEVELS.length-1],
+    complete: items.length>0 && learned>=items.length
+  };
+}
+/* Le vocabulaire du niveau en cours et des niveaux précédents */
+function eligibleVocab(){
+  var idx=levelIndex(currentLevel());
+  return VOCAB.filter(function(w){return levelIndex(w.lvl)<=idx;});
+}
+/* Tous les mots du niveau retenus → on passe au niveau suivant */
+function maybeLevelUp(){
+  var p=levelProgress();
+  if(!p.complete || p.isMax) return null;
+  state.level=LEVELS[levelIndex(p.lvl)+1];
+  scheduleSave();
+  return {from:p.lvl, to:state.level};
+}
+/* Accord du pluriel pour les compteurs de mots */
+function motsLabel(n){ return n+" mot"+(n>1?"s":""); }
+
+/* ============================================================
+   ÉTAT
+   ============================================================ */
+function defaultState(){
+  return {
+    version:1,
+    onboarded:false,
+    level:"B1",
+    streak:0,
+    lastFullDay:null,
+    today:{date:todayStr(),vocab:false,grammar:false},
+    srs:{},
+    grammarDone:[],
+    favorites:{},
+    settings:{sound:true},
+    createdAt:todayStr()
+  };
+}
+var state=defaultState();
+var ui={view:"dashboard"};
+var dbHandle=null;
+var dbDoc=null;
+var saveTimer=null;
+var audioCtx=null;
+
+function ensureToday(){
+  var t=todayStr();
+  if(state.today.date!==t){
+    var wasFull=state.today.vocab&&state.today.grammar;
+    if(wasFull) state.lastFullDay=state.today.date;
+    if(state.lastFullDay){
+      var gap=dayDiff(state.lastFullDay,t);
+      if(gap>1) state.streak=0;
+    } else {
+      state.streak=0;
+    }
+    state.today={date:t,vocab:false,grammar:false};
+  }
+}
+
+var pendingWrite=false;
+function scheduleSave(){
+  if(saveTimer) clearTimeout(saveTimer);
+  saveTimer=setTimeout(function(){
+    saveTimer=null;
+    if(dbDoc){
+      pendingWrite=false;
+      var clone=JSON.parse(JSON.stringify(state));
+      dbDoc.set(clone).catch(function(e){ console.warn("db save failed",e); });
+    } else {
+      pendingWrite=true; // la connexion n'est pas encore prête : boot() rejouera l'écriture dès qu'elle le sera
+    }
+  },350);
+}
+
+function markSessionDone(kind){
+  var already=state.today[kind];
+  state.today[kind]=true;
+  var justCompletedDay=false;
+  if(!already && state.today.vocab && state.today.grammar){
+    var t=state.today.date;
+    if(state.lastFullDay && dayDiff(state.lastFullDay,t)===1){
+      state.streak+=1;
+    } else {
+      state.streak=1;
+    }
+    state.lastFullDay=t;
+    justCompletedDay=true;
+  }
+  scheduleSave();
+  return {justCompletedDay:justCompletedDay};
+}
+
+/* ============================================================
+   MOTEUR SRS — sélection du vocabulaire
+   ============================================================ */
+function pickVocabQueue(theme){
+  var t=todayStr();
+  var pool=eligibleVocab();
+  if(theme) pool=pool.filter(function(w){return w.th===theme;});
+  var due=[], fresh=[];
+  pool.forEach(function(w){
+    var s=state.srs[w.id];
+    if(!s) fresh.push(w);
+    else if(s.due<=t) due.push(w);
+  });
+  due.sort(function(a,b){return state.srs[a.id].due<state.srs[b.id].due?-1:1;});
+  var target=Math.min(10,pool.length);
+  var queue=due.slice(0,target);
+  if(queue.length<target){
+    queue=queue.concat(shuffle(fresh).slice(0,target-queue.length));
+  }
+  if(queue.length<target){
+    var extra=shuffle(pool.filter(function(w){return queue.indexOf(w)===-1;}));
+    queue=queue.concat(extra.slice(0,target-queue.length));
+  }
+  return shuffle(queue).map(function(w){return w.id;});
+}
+
+function rateVocab(id,easy){
+  var s=state.srs[id]||{box:-1,due:todayStr()};
+  if(easy){ s.box=Math.min(5,s.box+1); }
+  else { s.box=0; }
+  s.due=addDaysStr(todayStr(),BOX_INTERVALS[Math.max(0,s.box)]);
+  state.srs[id]=s;
+  scheduleSave();
+}
+
+function toggleFavorite(id){
+  if(state.favorites[id]) delete state.favorites[id];
+  else state.favorites[id]=true;
+  scheduleSave();
+}
+
+/* Compte, sur le vocabulaire disponible (ou sur une seule situation) : retenus, favoris, à repasser */
+function vocabCounts(theme){
+  var pool=eligibleVocab();
+  if(theme) pool=pool.filter(function(w){return w.th===theme;});
+  var mastered=0, favorites=0;
+  pool.forEach(function(w){
+    if(isMastered(w.id)) mastered++;
+    if(state.favorites[w.id]) favorites++;
+  });
+  return {total:pool.length, mastered:mastered, favorites:favorites, toReview:pool.length-mastered};
+}
+
+/* ============================================================
+   GRAMMAIRE — sélection de la leçon
+   ============================================================ */
+function pickGrammarLesson(){
+  var lvlIdx=levelIndex(currentLevel());
+  for(var i=0;i<GRAMMAR.length;i++){
+    var g=GRAMMAR[i];
+    if(levelIndex(g.lvl)<=lvlIdx && state.grammarDone.indexOf(g.id)===-1) return g;
+  }
+  if(state.grammarDone.length){
+    var doneAtLvl=GRAMMAR.filter(function(g){return state.grammarDone.indexOf(g.id)!==-1;});
+    if(doneAtLvl.length) return doneAtLvl[Math.floor(Math.random()*doneAtLvl.length)];
+  }
+  return GRAMMAR[0];
+}
+
+/* ============================================================
+   SON — repère sonore du mode voiture
+   ============================================================ */
+function playTone(freq){
+  try{
+    if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==="suspended") audioCtx.resume();
+    var t0=audioCtx.currentTime;
+    var osc=audioCtx.createOscillator();
+    var gain=audioCtx.createGain();
+    osc.type="sine";
+    osc.frequency.setValueAtTime(freq,t0);
+    gain.gain.setValueAtTime(0,t0);
+    gain.gain.linearRampToValueAtTime(.14,t0+.06);
+    gain.gain.linearRampToValueAtTime(0,t0+.9);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(t0);
+    osc.stop(t0+.95);
+  }catch(e){}
+}
+
+/* ============================================================
+   SON — prononciation du vocabulaire (synthèse vocale)
+   ============================================================ */
+function speak(text,lang){
+  try{
+    if(!window.speechSynthesis || !text) return;
+    window.speechSynthesis.cancel();
+    var u=new SpeechSynthesisUtterance(text);
+    u.lang=lang;
+    u.rate=0.9;
+    window.speechSynthesis.speak(u);
+  }catch(e){}
+}
+/* Lit plusieurs textes à la suite (ex. le mot, puis la phrase d'exemple) */
+function speakSequence(parts){
+  try{
+    if(!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    var queue=parts.filter(function(p){return p && p.text;});
+    if(!queue.length) return;
+    var i=0;
+    function next(){
+      if(i>=queue.length) return;
+      var p=queue[i++];
+      var u=new SpeechSynthesisUtterance(p.text);
+      u.lang=p.lang;
+      u.rate=0.9;
+      u.onend=next;
+      u.onerror=next;
+      window.speechSynthesis.speak(u);
+    }
+    next();
+  }catch(e){}
+}
+
+/* ============================================================
+   RENDU — utilitaires communs
+   ============================================================ */
+var reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function navBar(active){
+  function b(id,label){
+    return '<button class="navbtn'+(active===id?' active':'')+'" data-action="nav" data-view="'+id+'"><span class="dot"></span>'+label+'</button>';
+  }
+  return '<nav class="bottomnav">'+b("dashboard","Inicio")+b("car","Coche")+b("stats","Progreso")+b("settings","Ajustes")+'</nav>';
+}
+
+function topBar(){
+  var lvl=currentLevel();
+  return '<header class="topbar">'+
+    '<div><p class="wordmark">Compás<span class="accent-dot">·</span></p>'+
+    '<div class="flag-stripe andalucia" aria-hidden="true"><span class="r1"></span><span class="y"></span><span class="g1"></span><span class="w"></span><span class="g2"></span></div></div>'+
+    '<div class="topbar-meta">'+
+      '<span class="pill pill-streak">🔥 '+state.streak+'</span>'+
+      '<span class="pill pill-level">'+lvl+'</span>'+
+    '</div>'+
+  '</header>';
+}
+
+/* ============================================================
+   VUE — Onboarding
+   ============================================================ */
+function viewOnboarding(){
+  var choices='<button class="level-btn" data-action="start-level" data-level="B1" style="margin-bottom:10px;width:100%"><b>Commencer au niveau B1 — '+LEVEL_NAME.B1+'</b><span>Objectif : atteindre le C2, marche après marche.</span></button>';
+  return '<div class="onb-wrap">'+
+    '<p class="onb-mark">Compás</p>'+
+    '<div class="flag-stripe andalucia" aria-hidden="true" style="width:72px;height:5px;margin-bottom:16px"><span class="r1"></span><span class="y"></span><span class="g1"></span><span class="w"></span><span class="g2"></span></div>'+
+    '<p class="onb-tag">Espagnol du niveau B1 au C2, en séances quotidiennes sans chronomètre — vocabulaire et grammaire, chacune pensée pour te faire franchir un niveau (B1 → B2 → C1 → C2) — plus un mode voiture pour réviser au volant.</p>'+
+    '<div class="onb-feature"><span class="onb-dot" style="background:var(--yellow)"></span><div><b>Vocabulaire du quotidien</b><span>Rangé par situation : banque, garage, actualité, droit, débats… et revu juste avant que tu l'+"'"+'oublies.</span></div></div>'+
+    '<div class="onb-feature"><span class="onb-dot" style="background:var(--ink-soft)"></span><div><b>Grammaire progressive</b><span>20 leçons, du subjonctif présent aux pièges de l\'écrit.</span></div></div>'+
+    '<div class="onb-feature"><span class="onb-dot" style="background:var(--green)"></span><div><b>Mode voiture</b><span>Quatre boutons géants aux couleurs de l\'Espagne, tout à la voix, pour réviser en conduisant.</span></div></div>'+
+    '<div class="onb-choices">'+
+      '<p class="section-label" style="margin-bottom:12px">Ton point de départ</p>'+
+      choices+
+      '<p class="sync-note"><span class="sync-dot"></span>Ta progression se synchronise entre tous tes appareils.</p>'+
+    '</div>'+
+  '</div>';
+}
+
+/* ============================================================
+   VUE — Dashboard
+   ============================================================ */
+function viewDashboard(){
+  var p=levelProgress();
+  var lvlIdx=levelIndex(p.lvl);
+  var hasNext=lvlIdx<LEVELS.length-1;
+  var phrase=PHRASES[(dateFromStr(state.today.date).getDate()+p.learned)%PHRASES.length];
+  var fullDay=state.today.vocab&&state.today.grammar;
+  var nextGoal=hasNext?"franchir le niveau "+LEVELS[lvlIdx+1]:"boucler ton C2";
+  var goalTag=hasNext?("Objectif · "+motsLabel(p.remaining)+" avant "+LEVELS[lvlIdx+1]):("Objectif · "+motsLabel(p.remaining)+" pour boucler le C2");
+
+  var html='';
+  html+=topBar();
+  html+='<main class="main">';
+
+  html+='<section class="hero-card">'+
+    '<div class="hero-top">'+
+      '<div><p class="hero-greet">Hola 👋</p><p class="hero-sub">'+(fullDay?"Journée complète — ¡enhorabuena!":"2 séances t'attendent aujourd'hui pour "+nextGoal+".")+'</p></div>'+
+    '</div>'+
+    '<div class="prog-row">'+
+      '<div class="prog-labels"><span>Nivel '+p.lvl+' · '+LEVEL_NAME[p.lvl]+'</span><span>'+p.learned+' / '+p.total+' mots retenus</span></div>'+
+      '<div class="prog-track"><div class="prog-fill" style="width:'+p.pct+'%"></div></div>'+
+      '<p class="prog-note">'+(p.remaining
+        ? ("Encore "+motsLabel(p.remaining)+" à retenir pour "+(hasNext?("passer en "+LEVELS[lvlIdx+1]):"boucler le niveau C2")+".")
+        : "Tous les mots du niveau sont retenus 🎉")+'</p>'+
+    '</div>'+
+  '</section>';
+
+  if(ui.levelUp){
+    html+='<div class="day-banner">🎉 ¡Nivel '+ui.levelUp.to+'! Tu as retenu tous les mots du niveau '+ui.levelUp.from+'.</div>';
+  } else if(ui.dayFlash){
+    html+='<div class="day-banner">🎉 Journée complète ! Serie de '+state.streak+' jour(s).</div>';
+  }
+
+  html+='<div class="session-list">'+sessionCard("vocab","Vocabulario","Les mots rangés par situation : banque, garage, politique, droit, débats…","var(--yellow)",goalTag)+
+    sessionCard("grammar","Gramática","Une leçon claire, puis 5 exercices pour l'ancrer.","var(--ink-soft)",goalTag)+
+  '</div>';
+
+  html+='<div class="quote-card"><p class="quote-es">"'+phrase.es+'"</p><p class="quote-fr">'+phrase.fr+'</p></div>';
+
+  html+='</main>';
+  html+=navBar("dashboard");
+  return html;
+}
+
+function sessionCard(kind,titleEs,desc,color,goalTag){
+  var done=state.today[kind];
+  var cls={vocab:"c-vocab",grammar:"c-grammar"}[kind];
+  var right = done
+    ? '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px"><span class="check-badge">✓ Hecho</span><button class="btn btn-outline" data-action="enter-session" data-kind="'+kind+'">Repetir</button></div>'
+    : '<button class="btn btn-yellow" data-action="enter-session" data-kind="'+kind+'">Empezar</button>';
+  return '<div class="session-card '+cls+'"><div class="session-body"><p class="session-title">'+titleEs+'</p><p class="session-desc">'+desc+'</p><span class="session-tag">'+goalTag+'</span></div>'+right+'</div>';
+}
+
+/* ============================================================
+   VUE — Session vocabulaire
+   ============================================================ */
+/* Le lexique est rangé par scène de la vie de tous les jours : on choisit d'abord la situation */
+function viewVocabSections(){
+  var p=levelProgress();
+  var elig=eligibleVocab();
+  var groups={};
+  elig.forEach(function(w){
+    var g=groups[w.th]||(groups[w.th]={total:0,learned:0});
+    g.total++;
+    if(isMastered(w.id)) g.learned++;
+  });
+
+  var html=topBar();
+  html+='<main class="main">';
+  html+='<div class="session-header"><h2>Vocabulario</h2><button class="iconbtn" data-action="exit-session">✕</button></div>';
+  html+='<p class="sec-intro">Le vocabulaire est rangé par situation de la vie de tous les jours. Lance la séance du jour — elle mélange les mots à revoir — ou choisis une situation précise.</p>';
+  html+='<button class="btn btn-yellow btn-lg btn-wide" data-action="start-vocab" data-theme="">Séance du jour · 10 mots</button>';
+  html+='<p class="sec-hint">Niveau '+p.lvl+' — '+p.learned+' / '+p.total+' mots retenus.</p>';
+
+  var open=false, lastLvl=null;
+  THEMES.forEach(function(th){
+    var g=groups[th];
+    if(!g || !g.total) return;
+    var lv=THEME_LEVEL[th];
+    if(lv!==lastLvl){
+      if(open) html+='</div>';
+      html+='<p class="section-label">Niveau '+lv+' · '+LEVEL_NAME[lv]+'</p><div class="sec-list">';
+      open=true; lastLvl=lv;
+    }
+    var pct=Math.round((g.learned/g.total)*100);
+    var full=g.learned>=g.total;
+    html+='<button class="sec-btn'+(full?' done':'')+'" data-action="start-vocab" data-theme="'+escapeHtml(th)+'">'+
+      '<span class="sec-emoji">'+(TH_ICON[th]||'•')+'</span>'+
+      '<span class="sec-body"><span class="sec-name">'+escapeHtml(th)+'</span><span class="sec-bar"><i style="width:'+pct+'%"></i></span></span>'+
+      '<span class="sec-count">'+g.learned+'/'+g.total+'</span>'+
+    '</button>';
+  });
+  if(open) html+='</div>';
+
+  html+='</main>';
+  html+=navBar("dashboard");
+  return html;
+}
+
+function viewVocab(){
+  if(!ui.vq) return viewVocabSections();
+  var vq=ui.vq;
+  var html=topBar();
+  html+='<main class="main">';
+  html+='<div class="session-header"><h2>'+(vq.theme?escapeHtml(vq.theme):"Vocabulario")+'</h2><button class="iconbtn" data-action="exit-session">✕</button></div>';
+  html+='<div class="progress-strip"><div style="width:'+Math.round((vq.idx/vq.queue.length)*100)+'%;background:var(--yellow)"></div></div>';
+
+  if(vq.idx>=vq.queue.length){
+    return html+doneScreen("vocab","¡Vocabulario listo!","Has repasado "+vq.queue.length+" palabras hoy.",vq.missed)+navBar("dashboard");
+  }
+
+  var vc=vocabCounts(vq.theme);
+  html+='<div class="vocab-meta">'+
+    '<div class="vm-item"><span class="vm-num">'+vc.total+'</span><span class="vm-label">Total</span></div>'+
+    '<div class="vm-item"><span class="vm-num">'+vc.mastered+'</span><span class="vm-label">Dominadas</span></div>'+
+    '<div class="vm-item"><span class="vm-num">'+vc.favorites+'</span><span class="vm-label">Favoritas</span></div>'+
+    '<div class="vm-item"><span class="vm-num">'+vc.toReview+'</span><span class="vm-label">A repasar</span></div>'+
+  '</div>';
+
+  var w=VOCAB_BY_ID[vq.queue[vq.idx]];
+  var isFav=!!state.favorites[w.id];
+  var favBtn='<button class="fav-btn'+(isFav?' active':'')+'" data-action="toggle-favorite" data-id="'+w.id+'" aria-label="'+(isFav?'Quitar de favoritos':'Añadir a favoritos')+'">'+(isFav?'★':'☆')+'</button>';
+  html+='<div class="flashcard-wrap">';
+  html+='<div class="flashcard'+(vq.flipped?' flipped':'')+'" data-action="card-tap">';
+  html+='<div class="flip-inner">';
+  // Recto : le mot français — 1er toque : lit le mot + la phrase, sans retourner. 2e toque : retourne la carte.
+  html+='<div class="flip-face flip-front">';
+  html+='<button class="speak-btn" data-action="speak-current" aria-label="Écouter la prononciation">🔊</button>';
+  html+=favBtn;
+  html+='<span class="theme-tag">'+w.th+' · '+w.lvl+'</span>';
+  html+='<p class="side-tag">Français</p>';
+  html+='<p class="prompt-word'+(vq.spoken?'':' arrive')+'">'+w.fr+'</p>';
+  if(w.xfr) html+='<p class="example">'+w.xfr+'</p>';
+  html+='<p class="hint">'+(vq.spoken?'Toca de nuevo para voltear la carta':'Toca la carta para escuchar la palabra')+'</p>';
+  html+='</div>';
+  // Verso : la réponse en espagnol — apparaît au 2e toque, qui lit automatiquement le mot puis la phrase
+  html+='<div class="flip-face flip-back">';
+  html+='<button class="speak-btn" data-action="speak-current" aria-label="Escuchar la pronunciación">🔊</button>';
+  html+=favBtn;
+  html+='<span class="theme-tag">'+w.th+' · '+w.lvl+'</span>';
+  html+='<p class="echo-word">'+w.fr+'</p>';
+  html+='<p class="side-tag">Español</p>';
+  html+='<p class="answer-word">'+w.es+'</p>';
+  if(w.xes) html+='<p class="example">« '+w.xes+' »<br>'+w.xfr+'</p>';
+  html+='</div>';
+  html+='</div>';
+  html+='</div>';
+  if(vq.flipped){
+    html+='<div class="rate-row"><button class="btn btn-outline btn-lg" data-action="rate-vocab" data-easy="0">😅 A repasar</button><button class="btn btn-green btn-lg" data-action="rate-vocab" data-easy="1">😄 Lo sabía</button></div>';
+    html+='<p class="kbd-hint"><kbd>1</kbd> a repasar · <kbd>2</kbd> lo sabía</p>';
+  } else {
+    html+='<p class="kbd-hint"><kbd>␣</kbd> '+(vq.spoken?'voltear la carta':'escuchar')+'</p>';
+  }
+  html+='</div>';
+  html+='</main>';
+  html+=navBar("dashboard");
+  return html;
+}
+
+/* ============================================================
+   VUE — Session grammaire
+   ============================================================ */
+function viewGrammar(){
+  if(!ui.gq){
+    var lesson=pickGrammarLesson();
+    ui.gq={lessonId:lesson.id,exIdx:-1,correct:0,answered:false,lastOk:null,lastNear:false,wrong:[]};
+  }
+  var gq=ui.gq;
+  var lesson=GRAMMAR_BY_ID[gq.lessonId];
+  var html=topBar();
+  html+='<main class="main">';
+  html+='<div class="session-header"><h2>Gramática · '+lesson.lvl+'</h2><button class="iconbtn" data-action="exit-session">✕</button></div>';
+
+  if(gq.exIdx===-1){
+    html+='<div class="progress-strip"><div style="width:0%;background:var(--ink-soft)"></div></div>';
+    html+='<div class="lesson-panel"><h3>'+lesson.title+'</h3>'+lesson.html+'</div>';
+    html+='<button class="btn btn-yellow btn-wide btn-lg" data-action="start-exercises">Empezar los ejercicios ('+lesson.exercises.length+')</button>';
+    html+='<p class="kbd-hint"><kbd>⏎</kbd> empezar</p>';
+    html+='</main>'+navBar("dashboard");
+    return html;
+  }
+
+  if(gq.exIdx>=lesson.exercises.length){
+    var pct=Math.round((gq.correct/lesson.exercises.length)*100);
+    return html+doneScreen("grammar","¡Lección terminada!","Resultado: "+gq.correct+" / "+lesson.exercises.length+" ("+pct+"%)",gq.wrong)+navBar("dashboard");
+  }
+
+  html+='<div class="progress-strip"><div style="width:'+Math.round((gq.exIdx/lesson.exercises.length)*100)+'%;background:var(--ink-soft)"></div></div>';
+  var ex=lesson.exercises[gq.exIdx];
+  html+='<div class="exercise-card">';
+  html+='<span class="ex-count">Ejercicio '+(gq.exIdx+1)+' / '+lesson.exercises.length+'</span>';
+  html+='<p class="ex-prompt">'+ex.prompt+'</p>';
+
+  if(ex.type==="qcm"){
+    html+='<div class="opt-list">';
+    ex.options.forEach(function(opt,i){
+      var cls="opt-btn";
+      var dis="";
+      if(gq.answered){
+        dis="disabled";
+        if(i===ex.answer) cls+=" correct";
+        else if(i===gq.chosen) cls+=" wrong";
+      }
+      html+='<button class="'+cls+'" '+dis+' data-action="answer-qcm" data-idx="'+i+'">'+opt+'</button>';
+    });
+    html+='</div>';
+  } else {
+    var fillCls=gq.answered?(gq.lastOk?' correct':(gq.lastNear?' near':' wrong')):'';
+    html+='<div class="fill-row">';
+    html+='<input class="fill-input'+fillCls+'" id="fillInput" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" '+(gq.answered?('disabled value="'+escapeHtml(gq.lastYourInput||"")+'"'):'')+' placeholder="Escribe tu respuesta...">';
+    if(!gq.answered) html+='<button class="btn btn-green" data-action="answer-fill">Comprobar</button>';
+    html+='</div>';
+    if(!gq.answered) html+='<p class="kbd-hint" style="text-align:left"><kbd>⏎</kbd> comprobar</p>';
+  }
+
+  if(gq.answered){
+    var tier=gq.lastOk?'ok':(gq.lastNear?'near':'ko');
+    var lead=gq.lastOk?'<b>¡Correcto! </b>':(gq.lastNear?'<b>¡Casi! Fíjate en la ortografía — la respuesta era: '+(ex.type==="fill"?ex.answer.split("|").join(" / "):ex.options[ex.answer])+'. </b>':'<b>Respuesta: '+(ex.type==="fill"?ex.answer.split("|").join(" / "):ex.options[ex.answer])+'. </b>');
+    html+='<div class="feedback '+tier+'">'+lead+ex.explain+'</div>';
+    html+='<button class="btn btn-yellow btn-wide btn-lg" style="margin-top:16px" data-action="next-exercise">Continuar</button>';
+    html+='<p class="kbd-hint"><kbd>⏎</kbd> continuar</p>';
+  }
+
+  html+='</div>';
+  html+='</main>';
+  html+=navBar("dashboard");
+  return html;
+}
+
+/* ============================================================
+   VUE — Modo coche
+   Pantalla completa, cuatro botones enormes (colores de la bandera
+   española), una sola función por botón, todo al oído :
+     De arriba abajo :
+     Amarillo — marca la palabra « sabida »
+     Negro    — repite la frase (francés, luego español)
+     Verde    — pasa a la palabra siguiente (y registra el resultado)
+     Rojo     — marca la palabra « a repasar »
+   La frase se lee sola al llegar a cada palabra y se muestra
+   siempre en texto grande.
+   Sin marca, la palabra se cuenta « sabida » al pasar.
+   ============================================================ */
+var CAR_DECK_SIZE=30;
+var carS={deck:[],i:0,mark:"",ok:0};
+
+function viewCar(){
+  var html=topBar();
+  html+='<main class="main">';
+  html+='<div class="session-header"><h2>Modo coche</h2><button class="iconbtn" data-action="nav" data-view="dashboard">✕</button></div>';
+  html+='<div class="quote-card" style="text-align:left">';
+  html+='<p style="margin:0 0 10px;font-weight:700">Pantalla completa, cuatro botones enormes, todo al oído.</p>';
+  html+='<p style="margin:0;color:var(--ink-soft);font-size:.88rem;line-height:1.6">Repasa vocabulario sin mirar la pantalla — ideal para el coche.<br><br>Amarillo: sabida · Negro: repetir · Verde: palabra siguiente · Rojo: a repasar.</p>';
+  html+='</div>';
+  html+='<button class="btn btn-green btn-wide btn-lg" data-action="car-start">Comenzar</button>';
+  html+='</main>';
+  html+=navBar("car");
+  return html;
+}
+
+function viewCarDrill(){
+  if(!carS.deck.length) buildCarDeck();
+  var txt='';
+  if(carS.deck.length){
+    var w=VOCAB_BY_ID[carS.deck[carS.i]];
+    txt='<div class="car-text"><div class="car-fr">'+escapeHtml(w.xfr||w.fr)+'</div><div class="car-es">'+escapeHtml(w.xes||w.es)+'</div></div>';
+  }
+  return '<div class="car-overlay">'+
+    '<button class="car-exit" data-action="car-exit" aria-label="Salir del modo coche">✕</button>'+
+    txt+
+    '<div class="car-pad">'+
+      '<button class="car-btn car-btn-known'+(carS.mark==="known"?' sel':'')+'" data-action="car-known" aria-label="Sabida"><span class="car-ico">✓</span>Connu</button>'+
+      '<button class="car-btn car-btn-repeat" data-action="car-repeat" aria-label="Repetir la frase"><span class="car-ico">↻</span>Répète</button>'+
+      '<button class="car-btn car-btn-next" data-action="car-next" aria-label="Palabra siguiente"><span class="car-ico">›</span>Suivant</button>'+
+      '<button class="car-btn car-btn-review'+(carS.mark==="review"?' sel':'')+'" data-action="car-review" aria-label="A repasar"><span class="car-ico">✕</span>À revoir</button>'+
+    '</div>'+
+  '</div>';
+}
+
+function carClean(t){ return (t||"").replace(/\s*\(.*?\)/g,"").trim(); }
+
+function buildCarDeck(){
+  var t=todayStr();
+  var pool=eligibleVocab();
+  var due=[],fresh=[],rest=[];
+  pool.forEach(function(w){
+    var s=state.srs[w.id];
+    if(!s) fresh.push(w);
+    else if(s.due<=t) due.push(w);
+    else rest.push(w);
+  });
+  carS.deck=shuffle(due).concat(shuffle(fresh),shuffle(rest)).slice(0,CAR_DECK_SIZE).map(function(w){return w.id;});
+  carS.i=0; carS.mark=""; carS.ok=0;
+}
+
+function carPlay(){
+  if(!carS.deck.length) buildCarDeck();
+  if(!carS.deck.length) return;
+  var w=VOCAB_BY_ID[carS.deck[carS.i]];
+  speakSequence([
+    {text:carClean(w.xfr||w.fr),lang:"fr-FR"},
+    {text:carClean(w.xes||w.es),lang:"es-ES"}
+  ]);
+}
+
+function carSetMark(m){
+  if(!carS.deck.length) return;
+  carS.mark=m;
+  if(state.settings.sound) playTone(m==="review"?300:600);
+  render();
+}
+
+function carNext(){
+  if(!carS.deck.length) buildCarDeck();
+  if(!carS.deck.length) return;
+  var ok=carS.mark!=="review";
+  rateVocab(carS.deck[carS.i],ok);
+  if(ok){ maybeLevelUp(); carS.ok++; }
+  carS.mark="";
+  carS.i++;
+  if(carS.i>=carS.deck.length) buildCarDeck();
+  render();
+  carPlay();
+}
+
+/* ============================================================
+   Écran de fin de séance
+   ============================================================ */
+function doneScreen(kind,title,sub,recap){
+  var color={vocab:"var(--yellow)",grammar:"var(--ink-soft)"}[kind];
+  var soft={vocab:"var(--yellow-soft)",grammar:"var(--surface-2)"}[kind];
+  var chip='';
+  if(kind==="vocab"){
+    var lp=ui.lastProgress||levelProgress();
+    var gain=ui.lastLearnedGain||0;
+    chip='<span class="gain-chip">'+(gain>0?'+'+gain+' · ':'')+lp.learned+' / '+lp.total+' mots retenus · '+lp.lvl+'</span>';
+  } else if(kind==="grammar"){
+    chip='<span class="gain-chip">'+state.grammarDone.length+' / '+GRAMMAR.length+' leçons de grammaire</span>';
+  }
+  var recapHtml='';
+  if(recap && recap.length){
+    if(kind==="vocab"){
+      recapHtml='<div class="recap"><p class="recap-title">Para repasar ('+recap.length+')</p>'+recap.map(function(w){
+        return '<div class="recap-item"><span class="recap-mark near">~</span><div class="recap-body">'+escapeHtml(w.fr)+' → <b>'+escapeHtml(w.es)+'</b></div></div>';
+      }).join("")+'</div>';
+    } else if(kind==="grammar"){
+      recapHtml='<div class="recap"><p class="recap-title">Para repasar ('+recap.length+')</p>'+recap.map(function(r){
+        return '<div class="recap-item"><span class="recap-mark '+(r.near?"near":"bad")+'">'+(r.near?"~":"✕")+'</span><div class="recap-body">'+r.prompt+'<br><span class="recap-you'+(r.near?" near":"")+'">Tú: '+escapeHtml(r.your||"—")+'</span> · Correcto: <b>'+escapeHtml(r.correct)+'</b></div></div>';
+      }).join("")+'</div>';
+    }
+  }
+  return '<main class="main"><div class="done-wrap">'+
+    '<div class="done-badge" style="background:'+soft+';color:'+color+'">✓</div>'+
+    '<h2>'+title+'</h2><p>'+sub+'</p>'+
+    (ui.levelUp?'<p class="done-levelup">🎉 ¡Nivel '+ui.levelUp.to+'! Tous les mots du niveau '+ui.levelUp.from+' sont retenus.</p>':'')+
+    chip+
+    (kind==="vocab"?'<p class="done-note">Un mot compte comme retenu après quatre rappels réussis, espacés dans le temps.</p>':'')+
+    recapHtml+
+    '<button class="btn btn-yellow btn-lg btn-wide" data-action="exit-session">Volver al inicio</button>'+
+  '</div></main>';
+}
+
+/* ============================================================
+   VUE — Progrès / Stats
+   ============================================================ */
+function viewStats(){
+  var p=levelProgress();
+  var lvlIdx=levelIndex(p.lvl);
+  var elig=eligibleVocab();
+  var learnedAll=0;
+  var groups={};
+  elig.forEach(function(w){
+    var g=groups[w.th]||(groups[w.th]={total:0,learned:0});
+    g.total++;
+    if(isMastered(w.id)){ g.learned++; learnedAll++; }
+  });
+
+  var html=topBar();
+  html+='<main class="main"><h2 style="margin:0 0 16px">Tu progreso</h2>';
+  html+='<div class="stat-grid">'+
+    '<div class="stat-tile"><span class="stat-num">'+p.learned+' / '+p.total+'</span><span class="stat-label">Palabras del nivel '+p.lvl+'</span></div>'+
+    '<div class="stat-tile"><span class="stat-num">'+state.streak+'</span><span class="stat-label">Días seguidos</span></div>'+
+    '<div class="stat-tile"><span class="stat-num">'+learnedAll+' / '+elig.length+'</span><span class="stat-label">Palabras retenidas en total</span></div>'+
+    '<div class="stat-tile"><span class="stat-num">'+state.grammarDone.length+' / '+GRAMMAR.length+'</span><span class="stat-label">Lecciones de gramática</span></div>'+
+  '</div>';
+
+  html+='<p class="section-label">Vocabulario por situación</p><div class="theme-progress">';
+  THEMES.forEach(function(th){
+    var g=groups[th];
+    if(!g || !g.total) return;
+    var pct=Math.round((g.learned/g.total)*100);
+    html+='<div class="tp-row"><span class="tp-name">'+(TH_ICON[th]||'')+' '+escapeHtml(th)+'</span><div class="tp-track"><div class="tp-fill" style="width:'+pct+'%"></div></div><span class="tp-count">'+g.learned+'/'+g.total+'</span></div>';
+  });
+  html+='</div>';
+
+  html+='<p class="section-label">Progresión de nivel</p>';
+  html+='<div class="prog-track" style="margin-bottom:6px"><div class="prog-fill" style="width:'+p.pct+'%"></div></div>';
+  html+='<p style="font-size:.8rem;color:var(--ink-soft);margin:0">Nivel '+p.lvl+' ('+LEVEL_NAME[p.lvl]+') — '+p.learned+' / '+p.total+' mots retenus. '+
+    (p.remaining
+      ? ("Encore "+motsLabel(p.remaining)+" pour "+(p.isMax?"boucler le C2.":("passer en "+LEVELS[lvlIdx+1]+".")))
+      : (p.isMax?"Niveau C2 complet 🎉":"Niveau terminé 🎉"))+'</p>';
+
+  html+='</main>';
+  html+=navBar("stats");
+  return html;
+}
+
+/* ============================================================
+   VUE — Réglages
+   ============================================================ */
+function viewSettings(){
+  var lvl=currentLevel();
+  var html=topBar();
+  html+='<main class="main"><h2 style="margin:0 0 16px">Ajustes</h2>';
+
+  html+='<p class="section-label">Sonido</p>';
+  html+='<div class="settings-group"><div class="settings-row"><div><div class="label">Señal sonora</div><div class="desc">Un tono grave al marcar una palabra a repasar en el modo coche.</div></div><button class="switch'+(state.settings.sound?" on":"")+'" data-action="toggle-sound"></button></div></div>';
+
+  html+='<p class="section-label">Nivel actual</p>';
+  html+='<div class="level-grid">'+LEVELS.map(function(l){
+    return '<button class="level-btn'+(l===lvl?" active":"")+'" data-action="set-level" data-level="'+l+'"><b>'+l+'</b><span>'+LEVEL_NAME[l]+'</span></button>';
+  }).join("")+'</div>';
+  html+='<p style="font-size:.76rem;color:var(--ink-faint);margin-top:8px">Changer de niveau change les mots proposés et l'+"'"+'objectif à atteindre. Les mots déjà retenus restent comptés.</p>';
+
+  html+='<p class="section-label">Synchronisation</p>';
+  html+='<div class="settings-group"><div class="settings-row"><div><div class="label">'+(dbHandle?"Connectée":"Non disponible")+'</div><div class="desc">'+(dbHandle?"Ta progression se synchronise en temps réel entre le Mac et le téléphone via ce même lien.":"Ouvre cette page depuis le lien publié (et connecté à ton compte) pour activer la synchronisation.")+'</div></div></div></div>';
+
+  html+='<p class="section-label">Données</p>';
+  html+='<div class="settings-group"><div class="settings-row"><div><div class="label">Réinitialiser la progression</div><div class="desc">Efface le niveau, la série et les répétitions. Irréversible.</div></div><button class="btn btn-outline" data-action="reset-progress">Réinitialiser</button></div></div>';
+
+  html+='</main>';
+  html+=navBar("settings");
+  return html;
+}
+
+/* ============================================================
+   RENDU PRINCIPAL
+   ============================================================ */
+function render(){
+  var app=document.getElementById("app");
+  var body='<div class="app-shell">';
+  if(!state.onboarded){
+    body+=viewOnboarding();
+  } else if(ui.view==="vocab"){
+    body+=viewVocab();
+  } else if(ui.view==="grammar"){
+    body+=viewGrammar();
+  } else if(ui.view==="car"){
+    body+=viewCar();
+  } else if(ui.view==="cardrill"){
+    body+=viewCarDrill();
+  } else if(ui.view==="stats"){
+    body+=viewStats();
+  } else if(ui.view==="settings"){
+    body+=viewSettings();
+  } else {
+    body+=viewDashboard();
+  }
+  body+='</div>';
+  app.innerHTML=body;
+}
+
+/* ============================================================
+   ACTIONS — factorisées pour être appelées au clic ET au clavier
+   ============================================================ */
+function doCardTap(){
+  if(!ui.vq || ui.vq.flipped) return;
+  var vq=ui.vq;
+  var w=VOCAB_BY_ID[vq.queue[vq.idx]];
+  if(!w) return;
+  if(!vq.spoken){
+    // 1er toque : lit le mot puis la phrase en français, la carte reste de face
+    vq.spoken=true;
+    speakSequence([{text:w.fr,lang:"fr-FR"},{text:w.xfr,lang:"fr-FR"}]);
+  } else {
+    // 2e toque : retourne la carte, lit automatiquement le mot puis la phrase en español
+    vq.flipped=true;
+    speakSequence([{text:w.es,lang:"es-ES"},{text:w.xes,lang:"es-ES"}]);
+  }
+  render();
+}
+function doSpeakCurrent(){
+  if(!ui.vq) return;
+  var w=VOCAB_BY_ID[ui.vq.queue[ui.vq.idx]];
+  if(!w) return;
+  if(ui.vq.flipped) speakSequence([{text:w.es,lang:"es-ES"},{text:w.xes,lang:"es-ES"}]);
+  else speakSequence([{text:w.fr,lang:"fr-FR"},{text:w.xfr,lang:"fr-FR"}]);
+}
+function doRateVocab(easy){
+  if(!ui.vq || !ui.vq.flipped) return;
+  var w=VOCAB_BY_ID[ui.vq.queue[ui.vq.idx]];
+  if(!easy && w) ui.vq.missed.push({es:w.es,fr:w.fr});
+  rateVocab(ui.vq.queue[ui.vq.idx],easy);
+  ui.vq.idx++;
+  ui.vq.flipped=false;
+  ui.vq.spoken=false;
+  if(ui.vq.idx>=ui.vq.queue.length){
+    var snap=levelProgress();
+    ui.lastProgress={lvl:snap.lvl,learned:snap.learned,total:snap.total};
+    ui.lastLearnedGain=Math.max(0,snap.learned-(ui.vq.learnedStart||0));
+    var res=markSessionDone("vocab");
+    if(res.justCompletedDay) ui.dayFlash=true;
+    var lu=maybeLevelUp();
+    if(lu) ui.levelUp=lu;
+  }
+  render();
+}
+function doStartExercises(){
+  if(!ui.gq) return;
+  ui.gq.exIdx=0;
+  ui.gq.answered=false;
+  render();
+}
+function doAnswerQcm(idx){
+  if(!ui.gq || ui.gq.answered) return;
+  var lesson=GRAMMAR_BY_ID[ui.gq.lessonId];
+  var ex=lesson.exercises[ui.gq.exIdx];
+  ui.gq.chosen=idx;
+  ui.gq.answered=true;
+  ui.gq.lastNear=false;
+  ui.gq.lastOk=(idx===ex.answer);
+  if(ui.gq.lastOk) ui.gq.correct++;
+  else ui.gq.wrong.push({prompt:ex.prompt,your:ex.options[idx],correct:ex.options[ex.answer],near:false});
+  render();
+}
+function doAnswerFill(){
+  if(!ui.gq || ui.gq.answered) return;
+  var lesson2=GRAMMAR_BY_ID[ui.gq.lessonId];
+  var ex2=lesson2.exercises[ui.gq.exIdx];
+  var inputEl=document.getElementById("fillInput");
+  var val=inputEl?inputEl.value:"";
+  var variants=ex2.answer.split("|").map(norm);
+  var nv=norm(val), na=variants[0];
+  var ok=variants.indexOf(nv)!==-1;
+  // « presque » : une seule lettre d'écart, réservé aux réponses assez longues pour éviter les faux positifs
+  var near=!ok && nv.length>0 && na.length>=4 && levenshtein(nv,na)<=1;
+  ui.gq.answered=true;
+  ui.gq.lastOk=ok;
+  ui.gq.lastNear=near;
+  ui.gq.lastYourInput=val;
+  if(ok) ui.gq.correct++;
+  else ui.gq.wrong.push({prompt:ex2.prompt,your:val,correct:ex2.answer.split("|").join(" / "),near:near});
+  render();
+}
+function doNextExercise(){
+  if(!ui.gq) return;
+  var lesson3=GRAMMAR_BY_ID[ui.gq.lessonId];
+  ui.gq.exIdx++;
+  ui.gq.answered=false;
+  ui.gq.chosen=null;
+  ui.gq.lastNear=false;
+  ui.gq.lastYourInput="";
+  if(ui.gq.exIdx>=lesson3.exercises.length){
+    if(state.grammarDone.indexOf(ui.gq.lessonId)===-1) state.grammarDone.push(ui.gq.lessonId);
+    var res2=markSessionDone("grammar");
+    if(res2.justCompletedDay) ui.dayFlash=true;
+    scheduleSave();
+  }
+  render();
+}
+
+/* ============================================================
+   ÉVÉNEMENTS
+   ============================================================ */
+document.getElementById("app").addEventListener("click",function(e){
+  var t=e.target.closest("[data-action]");
+  if(!t) return;
+  var action=t.getAttribute("data-action");
+
+  if(action==="nav"){
+    exitTransientQueues();
+    ui.view=t.getAttribute("data-view");
+    ui.dayFlash=false;
+    ui.levelUp=null;
+    render();
+  } else if(action==="start-level"){
+    state.level=t.getAttribute("data-level");
+    state.onboarded=true;
+    scheduleSave();
+    ui.view="dashboard";
+    render();
+  } else if(action==="enter-session"){
+    var kind=t.getAttribute("data-kind");
+    ui.view=kind;
+    ui.dayFlash=false;
+    ui.levelUp=null;
+    render();
+  } else if(action==="start-vocab"){
+    var vth=t.getAttribute("data-theme")||"";
+    var vqueue=pickVocabQueue(vth);
+    if(!vqueue.length) return;
+    ui.vq={queue:vqueue,idx:0,flipped:false,spoken:false,missed:[],theme:vth,learnedStart:levelProgress().learned};
+    ui.dayFlash=false;
+    ui.levelUp=null;
+    render();
+  } else if(action==="exit-session"){
+    exitTransientQueues();
+    ui.view="dashboard";
+    render();
+  } else if(action==="card-tap"){
+    doCardTap();
+  } else if(action==="speak-current"){
+    doSpeakCurrent();
+  } else if(action==="toggle-favorite"){
+    toggleFavorite(t.getAttribute("data-id"));
+    render();
+  } else if(action==="rate-vocab"){
+    doRateVocab(t.getAttribute("data-easy")==="1");
+  } else if(action==="start-exercises"){
+    doStartExercises();
+  } else if(action==="answer-qcm"){
+    doAnswerQcm(parseInt(t.getAttribute("data-idx"),10));
+  } else if(action==="answer-fill"){
+    doAnswerFill();
+  } else if(action==="next-exercise"){
+    doNextExercise();
+  } else if(action==="car-start"){
+    ui.view="cardrill";
+    if(!carS.deck.length) buildCarDeck();
+    render();
+    carPlay();
+  } else if(action==="car-exit"){
+    try{ window.speechSynthesis && window.speechSynthesis.cancel(); }catch(e){}
+    ui.view="car";
+    render();
+  } else if(action==="car-review"){
+    carSetMark("review");
+  } else if(action==="car-known"){
+    carSetMark("known");
+  } else if(action==="car-repeat"){
+    carPlay();
+  } else if(action==="car-next"){
+    carNext();
+  } else if(action==="toggle-sound"){
+    state.settings.sound=!state.settings.sound;
+    scheduleSave();
+    render();
+  } else if(action==="set-level"){
+    state.level=t.getAttribute("data-level");
+    scheduleSave();
+    render();
+  } else if(action==="reset-progress"){
+    if(window.confirm("Réinitialiser toute ta progression ? Cette action est irréversible.")){
+      var keepSound=state.settings.sound;
+      state=defaultState();
+      state.onboarded=false;
+      state.settings.sound=keepSound;
+      scheduleSave();
+      render();
+    }
+  }
+});
+
+function exitTransientQueues(){
+  ui.vq=null; ui.gq=null; ui.lastLearnedGain=null; ui.lastProgress=null;
+}
+
+/* ============================================================
+   ATAJOS DE TECLADO — reprend l'esprit « mains sur le clavier »
+   du FCL 0.55 Trainer (␣ pour voltear, ⏎ pour valider/continuar)
+   ============================================================ */
+document.addEventListener("keydown",function(e){
+  if(!state.onboarded || e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
+  var tag=(document.activeElement&&document.activeElement.tagName)||"";
+  if(ui.view==="vocab" && ui.vq && ui.vq.idx<ui.vq.queue.length){
+    if(!ui.vq.flipped){
+      if(e.key===" "){ e.preventDefault(); doCardTap(); }
+    } else {
+      if(e.key==="1"){ e.preventDefault(); doRateVocab(false); }
+      else if(e.key==="2"){ e.preventDefault(); doRateVocab(true); }
+    }
+  } else if(ui.view==="grammar" && ui.gq){
+    var lesson=GRAMMAR_BY_ID[ui.gq.lessonId];
+    if(ui.gq.exIdx===-1){
+      if(e.key==="Enter"){ e.preventDefault(); doStartExercises(); }
+    } else if(ui.gq.exIdx<lesson.exercises.length){
+      if(ui.gq.answered){
+        if(e.key==="Enter"){ e.preventDefault(); doNextExercise(); }
+      } else if(e.key==="Enter" && tag==="INPUT"){
+        e.preventDefault(); doAnswerFill();
+      }
+    }
+  }
+});
+
+/* ============================================================
+   DÉMARRAGE + SYNCHRONISATION
+   ============================================================ */
+function applyRemoteState(data){
+  if(!data) return;
+  data=JSON.parse(JSON.stringify(data)); // clone : les objets du snapshot Firestore sont gelés (non extensibles), il faut une copie mutable avant d'y ajouter des clés (state.srs[id]=..., state.favorites[id]=...)
+  state=Object.assign(defaultState(),data);
+  state.today=data.today||defaultState().today;
+  state.srs=data.srs||{};
+  state.grammarDone=data.grammarDone||[];
+  state.favorites=data.favorites||{};
+  state.settings=Object.assign({sound:true},data.settings||{});
+  /* progression enregistrée avant l'abandon des XP : on en déduit le niveau une fois pour toutes */
+  if(typeof data.level!=="string" || levelIndex(data.level)===-1){
+    state.level=(typeof data.xp==="number")?legacyLevelFromXp(data.xp):LEVELS[0];
+  }
+  delete state.xp;
+  ensureToday();
+}
+
+function boot(){
+  ensureToday();
+  render();
+  if(window.claude && typeof window.claude.use === "function"){
+    window.claude.use("db").then(function(db){
+      if(!db) return;
+      dbHandle=db;
+      dbDoc=db.doc("progress/state");
+      dbDoc.onSnapshot(function(snap){
+        if(pendingWrite){
+          // des changements locaux (ex. choix du niveau initial) ont eu lieu
+          // avant que la connexion ne soit prête : on les préserve et on les écrit maintenant,
+          // plutôt que d'écraser l'état local avec un instantané distant potentiellement obsolète.
+          pendingWrite=false;
+          var clone=JSON.parse(JSON.stringify(state));
+          dbDoc.set(clone).catch(function(e){ console.warn("db save failed",e); });
+        } else if(snap.exists){
+          applyRemoteState(snap.data());
+        }
+        render();
+      },function(err){
+        console.warn("db sync error",err);
+      });
+    }).catch(function(){});
+  }
+}
+
+boot();
+
+})();
+</script>
+
+</body></html>
