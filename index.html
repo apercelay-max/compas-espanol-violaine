@@ -312,6 +312,8 @@ button{font-family:inherit;}
 .car-overlay{background:radial-gradient(120% 80% at 50% 0%, #1a1c2a 0%, #0a0a0f 70%);}
 .car-text{flex:0 1 auto; padding:max(58px,calc(env(safe-area-inset-top) + 40px)) 34px 14px; text-align:center; display:flex; flex-direction:column; gap:14px; overflow:auto; min-height:0; max-height:44%;}
 .car-text .car-fr{font-size:clamp(1.35rem,5.6vw,2.1rem); font-weight:700; line-height:1.22; color:#aeb2c8;}
+.car-text .car-tag{font-size:.74rem; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:#F1BF00;}
+.car-text .car-es-hidden{color:#3a3d55; letter-spacing:.3em;}
 .car-text .car-es{font-family:'Fraunces',Georgia,serif; font-size:clamp(1.8rem,8vw,3.1rem); font-weight:600; line-height:1.15; color:#fff;}
 .car-pad{flex:1; min-height:0; display:flex; flex-direction:column; gap:14px; padding:6px 38px max(34px,calc(env(safe-area-inset-bottom) + 26px));}
 .car-btn{
@@ -324,10 +326,17 @@ button{font-family:inherit;}
 .car-btn .car-ico{font-size:1.6rem; line-height:1;}
 .car-btn:active{transform:scale(.97);}
 .car-btn.sel{box-shadow:0 0 0 4px rgba(255,255,255,.92), 0 10px 24px -10px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.22);}
-.car-btn-known{background:linear-gradient(160deg,#FFD23F,#F1BF00); color:#3a2a00;}
 .car-btn-repeat{background:linear-gradient(160deg,#2a2c3a,#0d0d12); color:#e8e9f2; border:1.5px solid rgba(255,255,255,.14);}
 .car-btn-next{background:linear-gradient(160deg,#1C8A4B,#0F4A29); color:#eafff2;}
 .car-btn-review{background:linear-gradient(160deg,#E0233F,#C8102E); color:#fff;}
+.car-count{position:absolute; top:max(22px,calc(env(safe-area-inset-top) + 10px)); left:0; right:0; text-align:center; font-size:.8rem; font-weight:800; letter-spacing:.12em; color:#6f7390; pointer-events:none;}
+.car-win-body{flex:1; min-height:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:40px 30px 10px; overflow:auto;}
+.car-win-emoji{font-size:4.2rem; line-height:1; margin-bottom:10px;}
+.car-win-es{font-family:'Fraunces',Georgia,serif; font-size:clamp(2rem,9vw,3.2rem); font-weight:600; color:#F1BF00; margin:0 0 8px;}
+.car-win-title{font-size:clamp(1.4rem,6vw,2rem); font-weight:800; color:#fff; margin:0 0 14px; line-height:1.2;}
+.car-win-msg{font-size:1.05rem; line-height:1.55; color:#c3c6da; margin:0; max-width:30em;}
+.car-win-msg b{color:#fff;}
+.car-win-pad{flex:0 0 auto; height:38%;}
 
 /* ---------- Completion ---------- */
 .done-wrap{display:flex; flex-direction:column; align-items:center; text-align:center; padding:30px 8px;}
@@ -1095,6 +1104,85 @@ var VOCAB_BY_ID={};
 VOCAB.forEach(function(w){VOCAB_BY_ID[w.id]=w;});
 var VOCAB_BY_LEVEL={};
 VOCAB.forEach(function(w){ (VOCAB_BY_LEVEL[w.lvl]=VOCAB_BY_LEVEL[w.lvl]||[]).push(w); });
+/* Grammaire du mode voiture : questions de conjugaison et de structure, français → espagnol.
+   Chaque groupe = [étiquette, "français = espagnol", ...]. Les identifiants (qB1.0.3…) suivent
+   l'ordre : ne jamais insérer au milieu, seulement ajouter à la fin d'un niveau. « vous » = vosotros. */
+var CAR_GRAM={
+B1:[
+["Condicional simple","je parlerais = yo hablaría","tu mangerais = tú comerías","il vivrait = él viviría","nous voyagerions = nosotros viajaríamos","vous diriez = vosotros diríais","ils pourraient = ellos podrían"],
+["Condicional · politesse","je voudrais = querría","j'aimerais = me gustaría","tu pourrais = podrías","je devrais = debería","il faudrait = habría que"],
+["Subjuntivo · réguliers","que je parle = que yo hable","que tu manges = que tú comas","qu'il vive = que él viva","que nous parlions = que nosotros hablemos","que vous mangiez = que vosotros comáis","qu'ils vivent = que ellos vivan"],
+["Subjuntivo · irréguliers","que je sois = que yo sea","que tu aies = que tú tengas","qu'il fasse = que él haga","que nous allions = que nosotros vayamos","que vous sachiez = que vosotros sepáis","qu'ils puissent = que ellos puedan","qu'il y ait = que haya","que je dise = que yo diga"],
+["Subjuntivo · après un verbe","je veux que tu viennes = quiero que vengas","il faut que tu viennes = hace falta que vengas","je doute qu'il vienne = dudo que venga","il est possible qu'il pleuve = es posible que llueva","je ne crois pas qu'il vienne = no creo que venga","j'espère que tu viens = espero que vengas"],
+["Subjuntivo · conjonctions","pour que tu comprennes = para que entiendas","avant que tu partes = antes de que te vayas","quand tu viendras = cuando vengas","dès que tu arriveras = en cuanto llegues","bien que ce soit cher = aunque sea caro"],
+["Impératif négatif","ne parle pas ! = ¡no hables!","ne mange pas ! = ¡no comas!","n'écris pas ! = ¡no escribas!","ne fais pas ça ! = ¡no hagas eso!","ne dis rien ! = ¡no digas nada!","ne sois pas triste ! = ¡no estés triste!"],
+["Impératif · vosotros et usted","parlez, vous deux ! = ¡hablad!","mangez, vous tous ! = ¡comed!","écrivez, vous tous ! = ¡escribid!","parlez, monsieur ! = ¡hable, señor!","venez, madame ! = ¡venga, señora!"],
+["Pluscuamperfecto","j'avais parlé = yo había hablado","tu avais mangé = tú habías comido","il avait vécu = él había vivido","nous avions fait = nosotros habíamos hecho","ils avaient vu = ellos habían visto"],
+["Impératif et pronoms","donne-le-moi ! = ¡dámelo!","dis-le-lui ! = ¡díselo!","lève-toi ! = ¡levántate!","assieds-toi ! = ¡siéntate!","ne te lève pas ! = ¡no te levantes!"],
+["Pronoms combinés","je le lui donne = se lo doy","il me le dit = me lo dice","nous te la montrons = te la mostramos","tu nous les envoies = nos los envías","je le lui ai dit = se lo he dicho"],
+["Se impersonnel","ici, on parle espagnol = aquí se habla español","ça se vend bien = se vende bien","on dit que = se dice que","on ne sait pas = no se sabe","il se peut que = puede que"],
+["Habitude et périphrases","je mange souvent à midi = suelo comer a mediodía","il court d'habitude = suele correr","je suis sur le point de partir = estoy a punto de salir","je me suis mis à pleurer = me puse a llorar","je continue de parler = sigo hablando"],
+["Imparfait ou passé","il pleuvait quand je suis sorti = llovía cuando salí","quand j'étais petit, je jouais = cuando era pequeño, jugaba","hier, il a plu = ayer llovió"],
+["Si + présent","si j'ai le temps, je viendrai = si tengo tiempo, vendré","si tu viens, je t'aiderai = si vienes, te ayudaré","si on part tôt, on arrive à l'heure = si salimos temprano, llegamos a tiempo"],
+["Pronoms relatifs","la femme qui parle = la mujer que habla","la ville où j'habite = la ciudad donde vivo","ce que tu dis = lo que dices","l'homme dont je parle = el hombre del que hablo"],
+["Apocope et lo","un grand homme = un gran hombre","le premier jour = el primer día","un bon ami = un buen amigo","le plus important = lo más importante","le bon côté = lo bueno"],
+["Hay · tous les temps","il y avait = había","il y a eu = hubo","il y aura = habrá","il y aurait = habría","qu'il y ait = que haya"]
+],
+B2:[
+["Subjuntivo imperfecto","je voulais que tu viennes = quería que vinieras","il fallait que je parte = hacía falta que me fuera","il voulait que nous restions = quería que nos quedáramos","je doutais qu'il puisse = dudaba que pudiera","je voulais que vous parliez = quería que hablarais"],
+["Si + subjuntivo imperfecto","si j'étais riche = si fuera rico","si j'avais le temps = si tuviera tiempo","si tu savais = si supieras","si nous pouvions = si pudiéramos","si tu venais demain = si vinieras mañana","si j'étais toi = si yo fuera tú"],
+["Condicional perfecto","j'aurais parlé = habría hablado","tu aurais mangé = habrías comido","il aurait fait = habría hecho","nous serions partis = nos habríamos ido","ils auraient pu = habrían podido","j'aurais aimé = me habría gustado"],
+["Futuro perfecto","j'aurai fini = habré terminado","tu auras fini = habrás terminado","il aura mangé = habrá comido","nous aurons vu = habremos visto","ils seront arrivés = habrán llegado"],
+["Futuro de probabilité","il doit être tard = será tarde","elle doit être malade = estará enferma","il doit avoir trente ans = tendrá treinta años","ils doivent être chez eux = estarán en casa"],
+["Subjuntivo perfecto","que j'aie parlé = que yo haya hablado","que tu aies mangé = que tú hayas comido","qu'il soit venu = que él haya venido","je suis content que tu sois venu = me alegro de que hayas venido","il est possible qu'il ait oublié = es posible que haya olvidado","je doute qu'il l'ait fait = dudo que lo haya hecho"],
+["Conjonctions et mode","bien que je sois fatigué = aunque esté cansado","à moins que tu viennes = a menos que vengas","pourvu que tu m'appelles = con tal de que me llames","sans que tu le saches = sin que lo sepas","au cas où il pleuvrait = por si llueve","pourvu qu'il pleuve = ojalá llueva"],
+["Croire, penser, douter","je crois qu'il est venu = creo que ha venido","je ne crois pas qu'il soit venu = no creo que haya venido","il est évident que c'est vrai = es evidente que es verdad","il n'est pas évident que ce soit vrai = no es evidente que sea verdad"],
+["Voix passive","la maison a été construite = la casa fue construida","le contrat a été signé = el contrato fue firmado","ils ont été arrêtés = fueron detenidos","on a annulé les vols = se cancelaron los vuelos","on a trouvé la solution = se encontró la solución"],
+["Discours indirect","il a dit qu'il viendrait = dijo que vendría","elle a dit qu'elle était fatiguée = dijo que estaba cansada","il m'a demandé si j'avais faim = me preguntó si tenía hambre","il m'a dit de partir = me dijo que me fuera","j'ai dit que oui = dije que sí"],
+["Verbes et prépositions","penser à = pensar en","rêver de = soñar con","compter sur = contar con","se rendre compte de = darse cuenta de","s'habituer à = acostumbrarse a","tomber amoureux de = enamorarse de","se souvenir de = acordarse de","ressembler à = parecerse a"],
+["Devenir","devenir riche = hacerse rico","devenir fou = volverse loco","devenir rouge = ponerse rojo","rester calme = quedarse tranquilo","devenir médecin = llegar a ser médico","se mettre en colère = ponerse furioso"],
+["Ser ou estar · sens qui change","il est malin = es listo","il est prêt = está listo","il est ennuyeux = es aburrido","il s'ennuie = está aburrido","il est méchant = es malo","ce plat est mauvais = este plato está malo"]
+],
+C1:[
+["Pluscuamperfecto de subjuntivo","si j'avais su = si hubiera sabido","si tu étais venu = si hubieras venido","si nous avions pu = si hubiéramos podido","si elle l'avait dit = si lo hubiera dicho","si j'avais su, je serais venu = si hubiera sabido, habría venido","j'aurais voulu que tu viennes = habría querido que vinieras"],
+["Comme si et ojalá","comme si de rien n'était = como si nada hubiera pasado","comme s'il savait = como si supiera","pourvu qu'il vienne = ojalá venga","si seulement il venait = ojalá viniera","si seulement j'avais su = ojalá lo hubiera sabido"],
+["Subjuntivo · relatives","je cherche quelqu'un qui parle espagnol = busco a alguien que hable español","il n'y a personne qui sache = no hay nadie que sepa","tout ce qui compte = todo lo que importa"],
+["Quoi que, où que","quoi que tu dises = digas lo que digas","où que tu ailles = vayas donde vayas","qui que ce soit = sea quien sea","quoi qu'il arrive = pase lo que pase","si cher soit-il = por caro que sea","aussi bon soit-il = por bueno que sea"],
+["Connecteurs soutenus","néanmoins = no obstante","en dépit de = a pesar de","puisque = puesto que","dans la mesure où = en la medida en que","quant à = en cuanto a","à condition que tu viennes = a condición de que vengas"],
+["Périphrases","il est censé arriver = se supone que llega","je finis par comprendre = acabo entendiendo","il se mit à crier = se echó a gritar","à peine arrivé, il a appelé = apenas llegó, llamó","ne serait-ce que = aunque solo sea"],
+["Infinitif composé","après avoir mangé = después de haber comido","sans avoir compris = sin haber entendido","pour avoir menti = por haber mentido"],
+["Constructions impersonnelles","il s'avère que = resulta que","il convient que = conviene que","il se trouve que = da la casualidad de que","il va de soi que = es obvio que"]
+],
+C2:[
+["Corrélations","plus tu parles, plus tu apprends = cuanto más hablas, más aprendes","non seulement… mais aussi = no solo… sino también","ni l'un ni l'autre = ni lo uno ni lo otro","soit… soit… = ya sea… ya sea…","tant… que… = tanto… que…"],
+["Mise en relief","c'est lui qui l'a dit = fue él quien lo dijo","c'est ce que je veux = es lo que quiero","ce n'est pas que je ne veuille pas = no es que no quiera","il n'y a qu'à attendre = solo hay que esperar"],
+["N'importe","n'importe quoi = cualquier cosa","n'importe qui = cualquiera","n'importe où = donde sea","n'importe quand = cuando sea"],
+["Aunque + subjuntivo","même s'il pleut demain = aunque llueva mañana","même si tu viens demain = aunque vengas mañana","même si j'étais fatigué = aunque estuviera cansado","même si tu l'avais su = aunque lo hubieras sabido"],
+["Superlatif absolu","très cher = carísimo","très facile = facilísimo","très long = larguísimo","très bon = buenísimo","très célèbre = celebérrimo"],
+["Diminutifs et augmentatifs","un petit chat = un gatito","une petite maison = una casita","un gros mot = una palabrota","un grand sourire = una sonrisota"],
+["Lo + adjectif + que","tu ne sais pas comme c'est difficile = no sabes lo difícil que es","tu vois comme il est grand = ya ves lo grande que es","comme c'est beau ! = ¡qué bonito es!","imagine comme j'étais content = imagínate lo contento que estaba"],
+["Ser ou estar · nuances","il est mort = está muerto","il est mort hier = murió ayer","l'accident a eu lieu à Madrid = el accidente fue en Madrid","c'est sûr = es seguro","je suis sûr = estoy seguro"],
+["Locutions","on dirait que = parece que","il paraît que = dicen que","il s'en faut de peu = falta poco","dès lors que = siempre que","en tout état de cause = en cualquier caso"]
+]
+};
+
+/* Cartes du mode voiture : phrases de vocabulaire + cartes de grammaire (un groupe de grammaire
+   est glissé à intervalles réguliers parmi les phrases du niveau) */
+var CAR_BY_ID={}, CAR_BY_LEVEL={};
+LEVELS.forEach(function(lvl){
+  var vocab=VOCAB_BY_LEVEL[lvl]||[], groups=CAR_GRAM[lvl]||[], out=[], vi=0;
+  groups.forEach(function(g,gi){
+    var upto=Math.round((gi+1)*vocab.length/(groups.length+1));
+    while(vi<upto) out.push(vocab[vi++]);
+    for(var k=1;k<g.length;k++){
+      var p=g[k].split(" = ");
+      out.push({id:"q"+lvl+"."+gi+"."+(k-1),lvl:lvl,fr:p[0],es:p[1],xfr:p[0],xes:p[1],gram:true,tag:g[0]});
+    }
+  });
+  while(vi<vocab.length) out.push(vocab[vi++]);
+  CAR_BY_LEVEL[lvl]=out;
+  out.forEach(function(w){ CAR_BY_ID[w.id]=w; });
+});
 var GRAMMAR_BY_ID={};
 GRAMMAR.forEach(function(g){GRAMMAR_BY_ID[g.id]=g;});
 
@@ -1179,6 +1267,10 @@ function defaultState(){
     srs:{},
     grammarDone:[],
     favorites:{},
+    carLevel:"B1",
+    carKnown:{},
+    carMiss:{},
+    carDone:{},
     settings:{sound:true},
     createdAt:todayStr()
   };
@@ -1398,7 +1490,7 @@ function viewOnboarding(){
     '<p class="onb-tag">Espagnol du niveau B1 au C2, en séances quotidiennes sans chronomètre — vocabulaire et grammaire, chacune pensée pour te faire franchir un niveau (B1 → B2 → C1 → C2) — plus un mode voiture pour réviser au volant.</p>'+
     '<div class="onb-feature"><span class="onb-dot" style="background:var(--yellow)"></span><div><b>Vocabulaire du quotidien</b><span>Rangé par situation : banque, garage, actualité, droit, débats… et revu juste avant que tu l'+"'"+'oublies.</span></div></div>'+
     '<div class="onb-feature"><span class="onb-dot" style="background:var(--ink-soft)"></span><div><b>Grammaire progressive</b><span>20 leçons, du subjonctif présent aux pièges de l\'écrit.</span></div></div>'+
-    '<div class="onb-feature"><span class="onb-dot" style="background:var(--green)"></span><div><b>Mode voiture</b><span>Quatre boutons géants aux couleurs de l\'Espagne, tout à la voix, pour réviser en conduisant.</span></div></div>'+
+    '<div class="onb-feature"><span class="onb-dot" style="background:var(--green)"></span><div><b>Mode voiture</b><span>Trois boutons géants aux couleurs de l\'Espagne, tout à la voix, pour réviser en conduisant.</span></div></div>'+
     '<div class="onb-choices">'+
       '<p class="section-label" style="margin-bottom:12px">Ton point de départ</p>'+
       choices+
@@ -1640,98 +1732,208 @@ function viewGrammar(){
 
 /* ============================================================
    VUE — Modo coche
-   Pantalla completa, cuatro botones enormes (colores de la bandera
-   española), una sola función por botón, todo al oído :
-     De arriba abajo :
-     Amarillo — marca la palabra « sabida »
-     Negro    — repite la frase (francés, luego español)
-     Verde    — pasa a la palabra siguiente (y registra el resultado)
-     Rojo     — marca la palabra « a repasar »
+   Pantalla completa, tres botones enormes, todo al oído :
+     Negro  — dice la respuesta (frase en español)
+     Verde  — « Connu » : la frase se cuenta como conocida y no vuelve más
+     Rojo   — « À revoir » : la frase se anota y pasa a la siguiente
    La frase se lee sola al llegar a cada palabra y se muestra
    siempre en texto grande.
-   Sin marca, la palabra se cuenta « sabida » al pasar.
+   Cada nivel (B1 → C2) tiene su propia lista de frases conocidas
+   (state.carKnown). Una frase conocida no se vuelve a proponer.
+   Cuando todas las frases del nivel son conocidas : página de
+   felicitaciones y paso automático al nivel siguiente.
    ============================================================ */
-var CAR_DECK_SIZE=30;
-var carS={deck:[],i:0,mark:"",ok:0};
+var carS={deck:[]};
+
+function carWords(lvl){ return CAR_BY_LEVEL[lvl]||[]; }
+function carItem(id){ return CAR_BY_ID[id]||VOCAB_BY_ID[id]; }
+function carProgress(lvl){
+  var items=carWords(lvl), known=0;
+  for(var i=0;i<items.length;i++){ if(state.carKnown[items[i].id]) known++; }
+  return {known:known,total:items.length,complete:!!state.carDone[lvl]};
+}
+function carLevel(){ return levelIndex(state.carLevel)===-1?LEVELS[0]:state.carLevel; }
 
 function viewCar(){
+  var lvl=carLevel(), p=carProgress(lvl);
   var html=topBar();
   html+='<main class="main">';
   html+='<div class="session-header"><h2>Modo coche</h2><button class="iconbtn" data-action="nav" data-view="dashboard">✕</button></div>';
   html+='<div class="quote-card" style="text-align:left">';
-  html+='<p style="margin:0 0 10px;font-weight:700">Pantalla completa, cuatro botones enormes, todo al oído.</p>';
-  html+='<p style="margin:0;color:var(--ink-soft);font-size:.88rem;line-height:1.6">Repasa vocabulario sin mirar la pantalla — ideal para el coche.<br><br>Amarillo: sabida · Negro: respuesta (la frase en español) · Verde: palabra siguiente · Rojo: a repasar.</p>';
+  html+='<p style="margin:0 0 10px;font-weight:700">Pantalla completa, botones enormes, todo al oído.</p>';
+  html+='<p style="margin:0;color:var(--ink-soft);font-size:.88rem;line-height:1.6">Repasa frases sin mirar la pantalla — ideal para el coche.<br><br>Se oye la pregunta en francés ; la respuesta solo aparece (y se lee) al pulsar Negro, Verde o Rojo. Un segundo toque en Verde (conocida, no vuelve) o en Rojo (a repasar) pasa a la siguiente.<br><br>Entre las frases de vocabulario se mezclan preguntas de gramática : « je suis » → « yo soy », « tu voyageras » → « tú viajarás ». En ellas, « vous » = vosotros.<br><br>Las preguntas van de 15 en 15 : cuando conoces las 15, pasas a las 15 siguientes. Al terminar el nivel, repaso aleatorio (más a menudo las frases marcadas en rojo), y después pasas solo al nivel siguiente.</p>';
   html+='</div>';
-  html+='<button class="btn btn-green btn-wide btn-lg" data-action="car-start">Comenzar</button>';
+  html+='<p class="section-label">Nivel del modo coche</p>';
+  html+='<div class="level-grid" style="margin-bottom:16px">'+LEVELS.map(function(l){
+    var q=carProgress(l);
+    return '<button class="level-btn'+(l===lvl?" active":"")+'" data-action="car-set-level" data-level="'+l+'"><b>'+l+(q.complete?' ✓':'')+'</b><span>'+q.known+' / '+q.total+' frases conocidas</span></button>';
+  }).join("")+'</div>';
+  html+='<button class="btn btn-green btn-wide btn-lg" data-action="car-start">'+(p.complete?'Repasar el nivel '+lvl:'Comenzar · nivel '+lvl)+'</button>';
   html+='</main>';
   html+=navBar("car");
   return html;
 }
 
+function carCountLabel(lvl,p){
+  if(carS.note) return lvl+' · '+carS.note;
+  if(carS.mode==="review") return lvl+' · Révision · '+carS.deck.length+' restantes';
+  var blk=carBlockOf(lvl), nb=Math.ceil(carWords(lvl).length/CAR_BLOCK);
+  if(!blk) return lvl+' · '+p.known+' / '+p.total;
+  var kn=blk.words.filter(function(w){return state.carKnown[w.id];}).length;
+  return lvl+' · Groupe '+(blk.b+1)+' / '+nb+' · '+kn+' / '+blk.words.length;
+}
+
 function viewCarDrill(){
-  if(!carS.deck.length) buildCarDeck();
+  var lvl=carLevel(), p=carProgress(lvl);
   var txt='';
   if(carS.deck.length){
-    var w=VOCAB_BY_ID[carS.deck[carS.i]];
-    txt='<div class="car-text"><div class="car-fr">'+escapeHtml(w.xfr||w.fr)+'</div><div class="car-es">'+escapeHtml(w.xes||w.es)+'</div></div>';
+    var w=carItem(carS.deck[0]);
+    txt='<div class="car-text">'+
+      (w.gram?'<div class="car-tag">Grammaire · '+escapeHtml(w.tag)+'</div>':'')+
+      '<div class="car-fr">'+escapeHtml(w.xfr||w.fr)+'</div>'+
+      (carS.revealed
+        ? '<div class="car-es">'+escapeHtml(w.xes||w.es)+'</div>'
+        : '<div class="car-es car-es-hidden" aria-hidden="true">· · ·</div>')+
+    '</div>';
   }
   return '<div class="car-overlay">'+
+    '<div class="car-count">'+carCountLabel(lvl,p)+'</div>'+
     '<button class="car-exit" data-action="car-exit" aria-label="Salir del modo coche">✕</button>'+
     txt+
     '<div class="car-pad">'+
-      '<button class="car-btn car-btn-known'+(carS.mark==="known"?' sel':'')+'" data-action="car-known" aria-label="Sabida"><span class="car-ico">✓</span>Connu</button>'+
-      '<button class="car-btn car-btn-repeat" data-action="car-repeat" aria-label="Respuesta en español"><span class="car-ico">🔊</span>Réponse</button>'+
-      '<button class="car-btn car-btn-next" data-action="car-next" aria-label="Palabra siguiente"><span class="car-ico">›</span>Suivant</button>'+
-      '<button class="car-btn car-btn-review'+(carS.mark==="review"?' sel':'')+'" data-action="car-review" aria-label="A repasar"><span class="car-ico">✕</span>À revoir</button>'+
+      '<button class="car-btn car-btn-repeat" data-action="car-repeat" aria-label="Escuchar la respuesta en español"><span class="car-ico">↻</span>Réponse</button>'+
+      '<button class="car-btn car-btn-next" data-action="car-next" aria-label="Palabra siguiente"><span class="car-ico">✓</span>Connu</button>'+
+      '<button class="car-btn car-btn-review" data-action="car-review" aria-label="A repasar"><span class="car-ico">✕</span>À revoir</button>'+
+    '</div>'+
+  '</div>';
+}
+
+/* Page de félicitations : tout le niveau est connu */
+function viewCarLevelUp(){
+  var u=ui.carUp||{from:carLevel(),to:null,count:0};
+  var last=!u.to;
+  var title=last?'Tous les niveaux sont terminés !':'Niveau '+u.from+' terminé !';
+  var msg=last
+    ? 'Tu connais les '+u.count+' phrases du niveau '+u.from+' — et donc tout le mode voiture, de B1 à C2. Quel parcours !'
+    : 'Tu connais les '+u.count+' phrases du niveau '+u.from+'. Tu passes au niveau <b>'+u.to+' · '+LEVEL_NAME[u.to]+'</b> : '+carWords(u.to).length+' nouvelles phrases t\'attendent.';
+  return '<div class="car-overlay car-win">'+
+    '<div class="car-win-body">'+
+      '<div class="flag-stripe andalucia" aria-hidden="true" style="width:84px;height:6px;margin:0 auto 22px"><span class="r1"></span><span class="y"></span><span class="g1"></span><span class="w"></span><span class="g2"></span></div>'+
+      '<div class="car-win-emoji">🎉</div>'+
+      '<p class="car-win-es">¡Enhorabuena!</p>'+
+      '<h2 class="car-win-title">'+title+'</h2>'+
+      '<p class="car-win-msg">'+msg+'</p>'+
+    '</div>'+
+    '<div class="car-pad car-win-pad">'+
+      (last
+        ? '<button class="car-btn car-btn-next" data-action="car-restart">Tout recommencer</button>'
+        : '<button class="car-btn car-btn-next" data-action="car-continue">Continuer · niveau '+u.to+'</button>')+
+      '<button class="car-btn car-btn-repeat" data-action="car-exit">Quitter</button>'+
     '</div>'+
   '</div>';
 }
 
 function carClean(t){ return (t||"").replace(/\s*\(.*?\)/g,"").trim(); }
 
-function buildCarDeck(){
-  var t=todayStr();
-  var pool=eligibleVocab();
-  var due=[],fresh=[],rest=[];
-  pool.forEach(function(w){
-    var s=state.srs[w.id];
-    if(!s) fresh.push(w);
-    else if(s.due<=t) due.push(w);
-    else rest.push(w);
-  });
-  carS.deck=shuffle(due).concat(shuffle(fresh),shuffle(rest)).slice(0,CAR_DECK_SIZE).map(function(w){return w.id;});
-  carS.i=0; carS.mark=""; carS.ok=0;
+/* Groupes de 15 phrases : on ne passe au groupe suivant que quand les 15 sont connues */
+var CAR_BLOCK=15;
+function carBlockOf(lvl){
+  var ws=carWords(lvl);
+  for(var b=0;b*CAR_BLOCK<ws.length;b++){
+    var blk=ws.slice(b*CAR_BLOCK,(b+1)*CAR_BLOCK);
+    if(blk.some(function(w){return !state.carKnown[w.id];})) return {b:b,words:blk};
+  }
+  return null;
 }
 
-/* La phrase française est lue toute seule ; l'espagnol n'est dit qu'à l'appui sur « Réponse » */
+/* Paquet = les phrases pas encore connues du groupe en cours ; quand tout le niveau est parcouru :
+   révision aléatoire de tout le niveau, les phrases souvent marquées « à revoir » revenant plus souvent */
+function buildCarDeck(){
+  var lvl=carLevel(), blk=carBlockOf(lvl);
+  carS.note="";
+  carS.revealed=false;
+  if(blk){
+    carS.mode="learn";
+    carS.deck=shuffle(blk.words.filter(function(w){return !state.carKnown[w.id];})).map(function(w){return w.id;});
+  } else {
+    carS.mode="review";
+    var ids=[];
+    carWords(lvl).forEach(function(w){
+      var n=1+Math.min(state.carMiss[w.id]||0,4);
+      for(var i=0;i<n;i++) ids.push(w.id);
+    });
+    carS.deck=shuffle(ids);
+  }
+}
+
+/* Révision terminée → félicitations, puis niveau suivant */
+function carCheckLevelUp(){
+  var lvl=carLevel(), p=carProgress(lvl);
+  if(!p.complete) return false;
+  var idx=levelIndex(lvl), to=idx<LEVELS.length-1?LEVELS[idx+1]:null;
+  ui.carUp={from:lvl,to:to,count:p.total};
+  if(to){ state.carLevel=to; scheduleSave(); }
+  carS.deck=[];
+  ui.view="carlevelup";
+  try{ window.speechSynthesis && window.speechSynthesis.cancel(); }catch(e){}
+  if(state.settings.sound) playTone(880);
+  speak(to?("Félicitations ! Niveau "+lvl+" terminé. Tu passes au niveau "+to+"."):"Félicitations ! Tous les niveaux sont terminés.","fr-FR");
+  return true;
+}
+
 function carPlay(){
   if(!carS.deck.length) buildCarDeck();
   if(!carS.deck.length) return;
-  var w=VOCAB_BY_ID[carS.deck[carS.i]];
-  speakSequence([{text:carClean(w.xfr||w.fr),lang:"fr-FR"}]);
+  carS.revealed=false;
+  var w=carItem(carS.deck[0]);
+  speak(carClean(w.xfr||w.fr),"fr-FR");
 }
+
+/* Réponse : affiche et dit la phrase espagnole (à la demande) */
 function carAnswer(){
   if(!carS.deck.length) return;
-  var w=VOCAB_BY_ID[carS.deck[carS.i]];
-  speakSequence([{text:carClean(w.xes||w.es),lang:"es-ES"}]);
+  var w=carItem(carS.deck[0]);
+  if(!carS.revealed){ carS.revealed=true; render(); }
+  speak(carClean(w.xes||w.es),"es-ES");
 }
 
-function carSetMark(m){
-  if(!carS.deck.length) return;
-  carS.mark=m;
-  if(state.settings.sound) playTone(m==="review"?300:600);
-  render();
+/* Connu / À revoir : 1er appui = affiche et dit la réponse ; appui suivant = note la phrase et passe à la suivante */
+function carGrade(review){
+  if(carS.deck.length && !carS.revealed){ carAnswer(); return; }
+  carNext(review);
 }
 
-function carNext(){
+/* Suivant = phrase connue, retirée pour de bon ; À revoir = phrase notée, elle reviendra en fin de paquet */
+function carNext(review){
   if(!carS.deck.length) buildCarDeck();
   if(!carS.deck.length) return;
-  var ok=carS.mark!=="review";
-  rateVocab(carS.deck[carS.i],ok);
-  if(ok){ maybeLevelUp(); carS.ok++; }
-  carS.mark="";
-  carS.i++;
-  if(carS.i>=carS.deck.length) buildCarDeck();
+  var id=carS.deck.shift(), ok=!review, lvl=carLevel();
+  carS.note="";
+  carS.revealed=false;
+  if(state.settings.sound) playTone(ok?600:300);
+  if(VOCAB_BY_ID[id]) rateVocab(id,ok);
+  if(!ok){
+    state.carMiss[id]=(state.carMiss[id]||0)+1;
+    if(carS.mode==="learn") delete state.carKnown[id];
+    carS.deck.push(id);
+    scheduleSave();
+  } else {
+    if(carS.mode==="learn") state.carKnown[id]=true;
+    maybeLevelUp();
+    if(!carS.deck.length){
+      if(carS.mode==="review"){
+        state.carDone[lvl]=true;
+        scheduleSave();
+        if(carCheckLevelUp()){ render(); return; }
+      } else {
+        /* groupe de 15 terminé : groupe suivant, ou révision si le niveau est parcouru */
+        buildCarDeck();
+        carS.note=carS.mode==="review"?"Niveau parcouru · révision":"Groupe terminé ✓";
+        if(state.settings.sound) playTone(880);
+      }
+    }
+    scheduleSave();
+  }
   render();
   carPlay();
 }
@@ -1862,6 +2064,8 @@ function render(){
     body+=viewCar();
   } else if(ui.view==="cardrill"){
     body+=viewCarDrill();
+  } else if(ui.view==="carlevelup"){
+    body+=viewCarLevelUp();
   } else if(ui.view==="stats"){
     body+=viewStats();
   } else if(ui.view==="settings"){
@@ -2029,7 +2233,26 @@ document.getElementById("app").addEventListener("click",function(e){
     doNextExercise();
   } else if(action==="car-start"){
     ui.view="cardrill";
-    if(!carS.deck.length) buildCarDeck();
+    buildCarDeck();
+    render();
+    carPlay();
+  } else if(action==="car-set-level"){
+    state.carLevel=t.getAttribute("data-level");
+    scheduleSave();
+    render();
+  } else if(action==="car-continue"){
+    ui.view="cardrill";
+    buildCarDeck();
+    render();
+    carPlay();
+  } else if(action==="car-restart"){
+    state.carKnown={};
+    state.carMiss={};
+    state.carDone={};
+    state.carLevel=LEVELS[0];
+    scheduleSave();
+    ui.view="cardrill";
+    buildCarDeck();
     render();
     carPlay();
   } else if(action==="car-exit"){
@@ -2037,13 +2260,11 @@ document.getElementById("app").addEventListener("click",function(e){
     ui.view="car";
     render();
   } else if(action==="car-review"){
-    carSetMark("review");
-  } else if(action==="car-known"){
-    carSetMark("known");
+    carGrade(true);
   } else if(action==="car-repeat"){
     carAnswer();
   } else if(action==="car-next"){
-    carNext();
+    carGrade(false);
   } else if(action==="toggle-sound"){
     state.settings.sound=!state.settings.sound;
     scheduleSave();
@@ -2107,6 +2328,19 @@ function applyRemoteState(data){
   state.srs=data.srs||{};
   state.grammarDone=data.grammarDone||[];
   state.favorites=data.favorites||{};
+  state.carMiss=data.carMiss||{};
+  state.carDone=data.carDone||{};
+  if(data.carKnown){
+    state.carKnown=data.carKnown;
+    if(levelIndex(data.carLevel)===-1) state.carLevel=LEVELS[0];
+    /* niveaux déjà passés avant l'introduction de la révision : considérés comme terminés */
+    if(!data.carDone){ for(var li=0;li<levelIndex(state.carLevel);li++) state.carDone[LEVELS[li]]=true; }
+  } else {
+    /* mode voiture sans mémoire des phrases connues : on reprend les mots réussis au moins deux fois de suite */
+    state.carKnown={};
+    Object.keys(state.srs).forEach(function(id){ if(state.srs[id] && state.srs[id].box>=1) state.carKnown[id]=true; });
+    state.carLevel=LEVELS[0];
+  }
   state.settings=Object.assign({sound:true},data.settings||{});
   /* progression enregistrée avant l'abandon des XP : on en déduit le niveau une fois pour toutes */
   if(typeof data.level!=="string" || levelIndex(data.level)===-1){
