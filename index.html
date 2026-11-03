@@ -1311,11 +1311,16 @@ function ensureToday(){
 }
 
 var pendingWrite=false;
+/* version autonome (GitHub Pages, hors Claude) : pas de base partagée, la progression est gardée dans le navigateur */
+var standalone=!(window.claude && typeof window.claude.use==="function");
+var LS_KEY="compas-violaine-state";
 function scheduleSave(){
   if(saveTimer) clearTimeout(saveTimer);
   saveTimer=setTimeout(function(){
     saveTimer=null;
-    if(dbDoc){
+    if(standalone){
+      try{ localStorage.setItem(LS_KEY,JSON.stringify(state)); }catch(e){}
+    } else if(dbDoc){
       pendingWrite=false;
       var clone=JSON.parse(JSON.stringify(state));
       dbDoc.set(clone).catch(function(e){ console.warn("db save failed",e); });
@@ -2054,7 +2059,7 @@ function viewSettings(){
   html+='<p style="font-size:.76rem;color:var(--ink-faint);margin-top:8px">Changer de niveau change les mots proposés et l'+"'"+'objectif à atteindre. Les mots déjà retenus restent comptés.</p>';
 
   html+='<p class="section-label">Synchronisation</p>';
-  html+='<div class="settings-group"><div class="settings-row"><div><div class="label">'+(dbHandle?"Connectée":"Non disponible")+'</div><div class="desc">'+(dbHandle?"Ta progression se synchronise en temps réel entre le Mac et le téléphone via ce même lien.":"Ouvre cette page depuis le lien publié (et connecté à ton compte) pour activer la synchronisation.")+'</div></div></div></div>';
+  html+='<div class="settings-group"><div class="settings-row"><div><div class="label">'+(dbHandle?"Connectée":(standalone?"Sur cet appareil":"Non disponible"))+'</div><div class="desc">'+(dbHandle?"Ta progression se synchronise en temps réel entre le Mac et le téléphone via ce même lien.":(standalone?"Ta progression est enregistrée dans ce navigateur, sur cet appareil.":"Ouvre cette page depuis le lien publié (et connecté à ton compte) pour activer la synchronisation."))+'</div></div></div></div>';
 
   html+='<p class="section-label">Données</p>';
   html+='<div class="settings-group"><div class="settings-row"><div><div class="label">Réinitialiser la progression</div><div class="desc">Efface le niveau, la série et les répétitions. Irréversible.</div></div><button class="btn btn-outline" data-action="reset-progress">Réinitialiser</button></div></div>';
@@ -2540,6 +2545,9 @@ function applyRemoteState(data){
 }
 
 function boot(){
+  if(standalone){
+    try{ var saved=localStorage.getItem(LS_KEY); if(saved) applyRemoteState(JSON.parse(saved)); }catch(e){}
+  }
   ensureToday();
   render();
   if(window.claude && typeof window.claude.use === "function"){
