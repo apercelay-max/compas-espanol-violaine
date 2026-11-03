@@ -180,6 +180,18 @@ button{font-family:inherit;}
 .session-body{flex:1; min-width:0;}
 .session-title{font-weight:700; font-size:1rem; margin:0 0 2px;}
 .session-desc{margin:0; font-size:.8rem; color:var(--ink-soft); line-height:1.4;}
+.eval-card{display:flex; align-items:center; gap:14px; border:1.5px solid var(--yellow); border-radius:16px; padding:14px 16px; background:var(--yellow-soft); margin-bottom:14px;}
+.eval-card.done{border-color:var(--border); background:var(--surface);}
+.eval-lvl{font-family:'Fraunces',serif; font-weight:700; font-size:1.6rem; line-height:1;}
+.eval-big{font-family:'Fraunces',serif; font-weight:700; font-size:3.2rem; line-height:1; margin:4px 0 6px;}
+.eval-row{display:flex; align-items:center; gap:10px; font-size:.84rem; margin:6px 0;}
+.eval-row b{width:2.2em;}
+.eval-row .eval-bar{flex:1; height:8px; border-radius:999px; background:var(--border); overflow:hidden;}
+.eval-row .eval-bar i{display:block; height:100%; background:var(--green);}
+.eval-row .eval-bar i.ko{background:var(--red);}
+.eval-row span{width:3em; text-align:right; color:var(--ink-soft);}
+.eval-err{border-top:1px solid var(--border); padding:10px 0; font-size:.86rem; line-height:1.45;}
+.btn-skip{display:block; margin:14px auto 0; background:none; border:none; color:var(--ink-faint); font-weight:700; font-size:.84rem; cursor:pointer; text-decoration:underline;}
 .session-tag{font-size:.68rem; color:var(--ink-faint); font-weight:700; text-transform:uppercase; letter-spacing:.05em; margin-top:6px; display:block;}
 .btn{
   appearance:none; border:none; cursor:pointer; border-radius:12px;
@@ -1271,6 +1283,7 @@ function defaultState(){
     carKnown:{},
     carMiss:{},
     carDone:{},
+    evalResult:null,
     settings:{sound:true},
     createdAt:todayStr()
   };
@@ -1494,6 +1507,7 @@ function viewOnboarding(){
     '<div class="onb-choices">'+
       '<p class="section-label" style="margin-bottom:12px">Ton point de départ</p>'+
       choices+
+      '<button class="level-btn" data-action="eval-start" style="margin-bottom:10px;width:100%"><b>Faire d\'abord le test de niveau</b><span>'+EVAL_TOTAL+' questions au maximum, environ 5 minutes.</span></button>'+
       '<p class="sync-note"><span class="sync-dot"></span>Ta progression se synchronise entre tous tes appareils.</p>'+
     '</div>'+
   '</div>';
@@ -1514,6 +1528,7 @@ function viewDashboard(){
   var html='';
   html+=topBar();
   html+='<main class="main">';
+  if(!state.evalResult) html+=evalCard();
 
   html+='<section class="hero-card">'+
     '<div class="hero-top">'+
@@ -1534,6 +1549,7 @@ function viewDashboard(){
     html+='<div class="day-banner">🎉 Journée complète ! Serie de '+state.streak+' jour(s).</div>';
   }
 
+  if(state.evalResult) html+='<div style="margin-top:14px">'+evalCard()+'</div>';
   html+='<div class="session-list">'+sessionCard("vocab","Vocabulario","Les mots rangés par situation : banque, garage, politique, droit, débats…","var(--yellow)",goalTag)+
     sessionCard("grammar","Gramática","Une leçon claire, puis 5 exercices pour l'ancrer.","var(--ink-soft)",goalTag)+
   '</div>';
@@ -2049,12 +2065,175 @@ function viewSettings(){
 }
 
 /* ============================================================
+   TEST DE NIVEAU — 19 questions au maximum ; on s'arrête au premier
+   niveau non validé. La bonne réponse est toujours la 1re de la liste
+   (l'ordre est mélangé à l'affichage).
+   ============================================================ */
+var EVAL_BLOCKS=[
+  {lvl:"A2",pass:2,qs:[
+    {p:"Ayer <em>___</em> al cine con mis amigos.",o:["fui","voy","iré","iba"]},
+    {p:"¿Dónde <em>___</em> mis llaves? No las encuentro.",o:["están","son","hay","tienen"]},
+    {p:"« Il y a beaucoup de monde dans la rue. »",o:["Hay mucha gente en la calle.","Es mucho gente en la calle.","Tiene mucha gente en la calle.","Están muchas gente en la calle."]}
+  ]},
+  {lvl:"B1",pass:3,qs:[
+    {p:"Si tuviera tiempo, <em>___</em> a visitarte.",o:["iría","iré","fui","voy"]},
+    {p:"Cuando llegué a casa, mi hermano ya <em>___</em> la cena.",o:["había preparado","preparó","prepara","ha preparado"]},
+    {p:"Espero que mañana <em>___</em> buen tiempo.",o:["haga","hace","hará","hizo"]},
+    {p:"« Alquilar un coche » signifie…",o:["louer une voiture","acheter une voiture","réparer une voiture","garer une voiture"]}
+  ]},
+  {lvl:"B2",pass:3,qs:[
+    {p:"Si me lo hubieras dicho antes, te <em>___</em> ayudado.",o:["habría","había","he","hube"]},
+    {p:"Se me <em>___</em> las llaves en casa.",o:["olvidaron","olvidé","olvidaste","olvidamos"]},
+    {p:"« Ahorrar » signifie…",o:["économiser","dépenser","emprunter","gagner"]},
+    {p:"Me alegro de que <em>___</em> conseguido el trabajo.",o:["hayas","has","habías","hubieras"]}
+  ]},
+  {lvl:"C1",pass:3,qs:[
+    {p:"De haberlo sabido, no <em>___</em> venido.",o:["habría","habré","he","había"]},
+    {p:"Por mucho que <em>___</em>, no conseguirás convencerlo.",o:["insistas","insistes","insistirás","insistías"]},
+    {p:"« Estar hasta las narices » signifie…",o:["en avoir ras-le-bol","être fauché","être très occupé","être enrhumé"]},
+    {p:"Un synonyme de « sin embargo » est…",o:["no obstante","por consiguiente","además","puesto que"]}
+  ]},
+  {lvl:"C2",pass:3,qs:[
+    {p:"« Echar en cara » signifie…",o:["reprocher","jeter par terre","rappeler","avouer"]},
+    {p:"« Menoscabar » signifie…",o:["porter atteinte à","mépriser","compenser","dévoiler"]},
+    {p:"<em>___</em> que haga la pregunta, debe estar dispuesto a escuchar la respuesta.",o:["Quienquiera","Quien","Quién","Quienes"]},
+    {p:"No hay mal que por bien no <em>___</em>.",o:["venga","viene","vendrá","vino"]}
+  ]}
+];
+var EVAL_TOTAL=EVAL_BLOCKS.reduce(function(n,b){return n+b.qs.length;},0);
+var EVAL_LABEL={A1:"A1 — débutant",A2:"A2 — élémentaire",B1:"B1 — intermédiaire",B2:"B2 — avancé",C1:"C1 — autonome",C2:"C2 — maîtrise"};
+
+function evalShuffle(n){
+  var a=[],i,j,t;
+  for(i=0;i<n;i++) a.push(i);
+  for(i=n-1;i>0;i--){ j=Math.floor(Math.random()*(i+1)); t=a[i]; a[i]=a[j]; a[j]=t; }
+  return a;
+}
+function evalStart(){
+  ui.vq=null; ui.gq=null;
+  ui.ev={b:0,q:0,scores:{},wrong:[],order:evalShuffle(EVAL_BLOCKS[0].qs[0].o.length),done:false,result:null};
+  ui.view="eval";
+}
+function evalFinish(){
+  var ev=ui.ev, level="A1", near=null, answered=0, correct=0;
+  for(var i=0;i<EVAL_BLOCKS.length;i++){
+    var b=EVAL_BLOCKS[i], sc=ev.scores[b.lvl];
+    if(sc===undefined) break;
+    answered+=b.qs.length; correct+=sc;
+    if(sc>=b.pass) level=b.lvl;
+    else { if(sc===b.pass-1) near=b.lvl; break; }
+  }
+  ev.done=true;
+  ev.result={level:level,near:near,answered:answered,correct:correct};
+  state.evalResult={date:todayStr(),level:level,near:near,correct:correct,answered:answered,scores:ev.scores};
+  scheduleSave();
+}
+function evalAnswer(pos){
+  var ev=ui.ev;
+  if(!ev || ev.done) return;
+  var b=EVAL_BLOCKS[ev.b], q=b.qs[ev.q];
+  var picked=(pos>=0)?ev.order[pos]:-1;
+  if(picked===0) ev.scores[b.lvl]=(ev.scores[b.lvl]||0)+1;
+  else {
+    ev.scores[b.lvl]=ev.scores[b.lvl]||0;
+    ev.wrong.push({lvl:b.lvl,p:q.p.replace(/<\/?em>/g,""),your:picked===-1?"(sans réponse)":q.o[picked],good:q.o[0]});
+  }
+  ev.q++;
+  if(ev.q>=b.qs.length){
+    if(ev.scores[b.lvl]<b.pass || ev.b>=EVAL_BLOCKS.length-1){ evalFinish(); return; }
+    ev.b++; ev.q=0;
+  }
+  ev.order=evalShuffle(EVAL_BLOCKS[ev.b].qs[ev.q].o.length);
+}
+function evalApply(level){
+  state.level=level;
+  state.carLevel=level;
+  state.onboarded=true;
+  ui.ev=null;
+  ui.view="dashboard";
+  scheduleSave();
+}
+function evalCard(){
+  var r=state.evalResult;
+  if(!r){
+    return '<section class="eval-card"><div class="session-body"><p class="session-title">Test de niveau</p><p class="session-desc">Quelques questions de grammaire et de vocabulaire pour vérifier que l\'appli est bien réglée sur ton niveau. Environ 5 minutes, '+EVAL_TOTAL+' questions au maximum.</p></div>'+
+      '<button class="btn btn-yellow" data-action="eval-start">Commencer</button></section>';
+  }
+  return '<section class="eval-card done"><div class="eval-lvl">'+r.level+'</div><div class="session-body"><p class="session-title">Test de niveau</p><p class="session-desc">Niveau estimé : '+EVAL_LABEL[r.level]+' · '+r.correct+' / '+r.answered+' · '+r.date+'</p></div>'+
+    '<button class="btn btn-outline" data-action="eval-start">Refaire</button></section>';
+}
+function viewEval(){
+  var ev=ui.ev;
+  if(!ev){ evalStart(); ev=ui.ev; }
+  var html=topBar();
+  html+='<main class="main">';
+  html+='<div class="session-header"><h2>Test de niveau</h2><button class="iconbtn" data-action="exit-session">✕</button></div>';
+  if(ev.done) html+=viewEvalResult(ev);
+  else {
+    var b=EVAL_BLOCKS[ev.b], q=b.qs[ev.q], n=0;
+    for(var i=0;i<ev.b;i++) n+=EVAL_BLOCKS[i].qs.length;
+    n+=ev.q;
+    html+='<div class="progress-strip"><div style="width:'+Math.round(n/EVAL_TOTAL*100)+'%;background:var(--yellow)"></div></div>';
+    html+='<div class="exercise-card"><span class="ex-count">Pregunta '+(n+1)+' / '+EVAL_TOTAL+' max</span>';
+    html+='<p class="ex-prompt">'+q.p+'</p><div class="opt-list">';
+    ev.order.forEach(function(o,pos){
+      html+='<button class="opt-btn" data-action="eval-answer" data-idx="'+pos+'">'+q.o[o]+'</button>';
+    });
+    html+='</div><button class="btn-skip" data-action="eval-answer" data-idx="-1">Je ne sais pas</button></div>';
+    html+='<p class="kbd-hint">Pas de correction pendant le test : tu verras tes erreurs à la fin.</p>';
+  }
+  html+='</main>';
+  if(state.onboarded) html+=navBar("dashboard");
+  return html;
+}
+function viewEvalResult(ev){
+  var r=ev.result, cur=state.level, html='';
+  html+='<div class="hero-card"><p class="hero-sub" style="margin:0">Niveau estimé</p>'+
+    '<p class="eval-big">'+r.level+'</p>'+
+    '<p class="hero-sub" style="margin:0">'+EVAL_LABEL[r.level]+(r.near?' · proche du '+r.near:'')+'</p></div>';
+  html+='<div class="exercise-card" style="margin-top:14px">';
+  EVAL_BLOCKS.forEach(function(b){
+    var sc=ev.scores[b.lvl];
+    if(sc===undefined) html+='<div class="eval-row"><b>'+b.lvl+'</b><div class="eval-bar"></div><span>—</span></div>';
+    else html+='<div class="eval-row"><b>'+b.lvl+'</b><div class="eval-bar"><i class="'+(sc>=b.pass?'':'ko')+'" style="width:'+Math.round(sc/b.qs.length*100)+'%"></i></div><span>'+sc+' / '+b.qs.length+'</span></div>';
+  });
+  html+='</div>';
+
+  var reco;
+  var idx=levelIndex(r.level);
+  if(idx===-1){
+    reco='<b>L\'appli commence au niveau B1</b>, un peu au-dessus de ton résultat. Elle reste faisable en prenant le temps de bien lire les leçons ; dis-le si tu veux qu\'on ajoute un niveau en dessous.';
+  } else if(r.level===cur){
+    reco='<b>Le niveau '+cur+' de l\'appli est confirmé</b> : c\'est le bon point de départ pour toi.';
+  } else {
+    reco='<b>Ton résultat ('+r.level+') diffère du niveau réglé dans l\'appli ('+cur+').</b> Tu peux ajuster le niveau ci-dessous, à tout moment depuis les réglages.';
+  }
+  html+='<div class="feedback '+(r.level===cur||idx===-1?'ok':'near')+'" style="margin-top:14px">'+reco+'</div>';
+  html+='<p class="session-desc" style="margin-top:10px">Test indicatif (grammaire et vocabulaire), pas un examen officiel.</p>';
+
+  if(idx!==-1 && r.level!==cur)
+    html+='<button class="btn btn-yellow btn-wide btn-lg" style="margin-top:14px" data-action="eval-apply" data-level="'+r.level+'">'+(state.onboarded?'Passer':'Commencer')+' au niveau '+r.level+'</button>';
+  html+='<button class="btn '+(idx!==-1&&r.level!==cur?'btn-outline':'btn-yellow')+' btn-wide btn-lg" style="margin-top:10px" data-action="eval-apply" data-level="'+cur+'">'+(state.onboarded?'Garder le niveau '+cur:'Commencer au niveau '+cur)+'</button>';
+
+  if(ev.wrong.length){
+    html+='<p class="section-label" style="margin-top:22px">Tes erreurs</p><div class="exercise-card">';
+    ev.wrong.forEach(function(w){
+      html+='<div class="eval-err"><b>'+w.lvl+'</b> · '+w.p+'<br>Ta réponse : '+w.your+'<br><b>Réponse : '+w.good+'</b></div>';
+    });
+    html+='</div>';
+  }
+  return html;
+}
+
+/* ============================================================
    RENDU PRINCIPAL
    ============================================================ */
 function render(){
   var app=document.getElementById("app");
   var body='<div class="app-shell">';
-  if(!state.onboarded){
+  if(ui.view==="eval"){
+    body+=viewEval();
+  } else if(!state.onboarded){
     body+=viewOnboarding();
   } else if(ui.view==="vocab"){
     body+=viewVocab();
@@ -2190,6 +2369,15 @@ document.getElementById("app").addEventListener("click",function(e){
     ui.dayFlash=false;
     ui.levelUp=null;
     render();
+  } else if(action==="eval-start"){
+    evalStart();
+    render();
+  } else if(action==="eval-answer"){
+    evalAnswer(parseInt(t.getAttribute("data-idx"),10));
+    render();
+  } else if(action==="eval-apply"){
+    evalApply(t.getAttribute("data-level"));
+    render();
   } else if(action==="start-level"){
     state.level=t.getAttribute("data-level");
     state.onboarded=true;
@@ -2286,7 +2474,7 @@ document.getElementById("app").addEventListener("click",function(e){
 });
 
 function exitTransientQueues(){
-  ui.vq=null; ui.gq=null; ui.lastLearnedGain=null; ui.lastProgress=null;
+  ui.vq=null; ui.gq=null; ui.ev=null; ui.lastLearnedGain=null; ui.lastProgress=null;
 }
 
 /* ============================================================
@@ -2330,6 +2518,7 @@ function applyRemoteState(data){
   state.favorites=data.favorites||{};
   state.carMiss=data.carMiss||{};
   state.carDone=data.carDone||{};
+  state.evalResult=data.evalResult||null;
   if(data.carKnown){
     state.carKnown=data.carKnown;
     if(levelIndex(data.carLevel)===-1) state.carLevel=LEVELS[0];
