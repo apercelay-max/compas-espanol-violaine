@@ -159,6 +159,8 @@ button{font-family:inherit;}
 .prog-labels{display:flex; justify-content:space-between; gap:10px; font-size:.76rem; color:var(--ink-soft); margin-bottom:6px; font-weight:600;}
 .prog-labels span:last-child{font-variant-numeric:tabular-nums; white-space:nowrap;}
 .prog-track{height:8px; border-radius:999px; background:var(--border); overflow:hidden;}
+.prog-track.stack{display:flex;}
+.prog-learn{height:100%; background:var(--yellow); opacity:.55; transition:width .5s ease;}
 .prog-fill{height:100%; border-radius:999px; background:linear-gradient(90deg, var(--yellow), var(--red)); transition:width .5s ease;}
 .prog-note{margin:8px 0 0; font-size:.76rem; color:var(--ink-faint); line-height:1.4;}
 
@@ -391,7 +393,9 @@ button{font-family:inherit;}
 .tp-row{display:flex; align-items:center; gap:10px;}
 .tp-name{flex:0 0 150px; font-size:.8rem; color:var(--ink-soft); font-weight:600; line-height:1.3;}
 .tp-track{flex:1; height:7px; background:var(--border); border-radius:999px; overflow:hidden;}
-.tp-fill{height:100%; background:var(--yellow); border-radius:999px;}
+.tp-track{display:flex;}
+.tp-fill{height:100%; background:var(--yellow);}
+.tp-learn{height:100%; background:var(--yellow); opacity:.45;}
 .tp-count{flex:0 0 42px; text-align:right; font-size:.76rem; color:var(--ink-faint); font-variant-numeric:tabular-nums;}
 .section-label{font-size:.72rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-faint); margin:22px 0 10px;}
 .section-label:first-child{margin-top:0;}
@@ -1234,17 +1238,19 @@ function legacyLevelFromXp(xp){
   for(var i=0;i<LEVELS.length;i++){ if(xp>=LEGACY_XP_THRESHOLDS[LEVELS[i]]) lvl=LEVELS[i]; }
   return lvl;
 }
+function isLearning(id){ var s=state.srs[id]; return !!(s && s.box>=0 && s.box<MASTERED_BOX); }
 function isMastered(id){ var s=state.srs[id]; return !!(s && s.box>=MASTERED_BOX); }
 /* Progression du niveau en cours : mots retenus / mots à voir pour le compléter */
 function levelProgress(){
   var lvl=currentLevel();
   var items=VOCAB_BY_LEVEL[lvl]||[];
-  var learned=0;
-  for(var i=0;i<items.length;i++){ if(isMastered(items[i].id)) learned++; }
+  var learned=0, learning=0;
+  for(var i=0;i<items.length;i++){ if(isMastered(items[i].id)) learned++; else if(isLearning(items[i].id)) learning++; }
   return {
-    lvl:lvl, learned:learned, total:items.length,
+    lvl:lvl, learned:learned, learning:learning, total:items.length,
     remaining:Math.max(0,items.length-learned),
     pct: items.length?Math.round((learned/items.length)*100):0,
+    pctLearning: items.length?Math.round((learning/items.length)*100):0,
     isMax: lvl===LEVELS[LEVELS.length-1],
     complete: items.length>0 && learned>=items.length
   };
@@ -1541,10 +1547,10 @@ function viewDashboard(){
     '</div>'+
     '<div class="prog-row">'+
       '<div class="prog-labels"><span>Nivel '+p.lvl+' · '+LEVEL_NAME[p.lvl]+'</span><span>'+p.learned+' / '+p.total+' mots retenus</span></div>'+
-      '<div class="prog-track"><div class="prog-fill" style="width:'+p.pct+'%"></div></div>'+
+      '<div class="prog-track stack"><div class="prog-fill" style="width:'+p.pct+'%"></div><div class="prog-learn" style="width:'+p.pctLearning+'%"></div></div>'+
       '<p class="prog-note">'+(p.remaining
         ? ("Encore "+motsLabel(p.remaining)+" à retenir pour "+(hasNext?("passer en "+LEVELS[lvlIdx+1]):"boucler le niveau C2")+".")
-        : "Tous les mots du niveau sont retenus 🎉")+'</p>'+
+        : "Tous les mots du niveau sont retenus 🎉")+(p.learning?(" "+p.learning+" en cours d'apprentissage."):"")+'</p>'+
     '</div>'+
   '</section>';
 
@@ -2003,20 +2009,21 @@ function viewStats(){
   var p=levelProgress();
   var lvlIdx=levelIndex(p.lvl);
   var elig=eligibleVocab();
-  var learnedAll=0;
+  var learnedAll=0, learningAll=0;
   var groups={};
   elig.forEach(function(w){
-    var g=groups[w.th]||(groups[w.th]={total:0,learned:0});
+    var g=groups[w.th]||(groups[w.th]={total:0,learned:0,learning:0});
     g.total++;
     if(isMastered(w.id)){ g.learned++; learnedAll++; }
+    else if(isLearning(w.id)){ g.learning++; learningAll++; }
   });
 
   var html=topBar();
   html+='<main class="main"><h2 style="margin:0 0 16px">Tu progreso</h2>';
   html+='<div class="stat-grid">'+
-    '<div class="stat-tile"><span class="stat-num">'+p.learned+' / '+p.total+'</span><span class="stat-label">Palabras del nivel '+p.lvl+'</span></div>'+
+    '<div class="stat-tile"><span class="stat-num">'+(p.learned+p.learning)+' / '+p.total+'</span><span class="stat-label">Palabras trabajadas del nivel '+p.lvl+'</span></div>'+
     '<div class="stat-tile"><span class="stat-num">'+state.streak+'</span><span class="stat-label">Días seguidos</span></div>'+
-    '<div class="stat-tile"><span class="stat-num">'+learnedAll+' / '+elig.length+'</span><span class="stat-label">Palabras retenidas en total</span></div>'+
+    '<div class="stat-tile"><span class="stat-num">'+learnedAll+' / '+elig.length+'</span><span class="stat-label">Palabras retenidas en total ('+learningAll+' en curso)</span></div>'+
     '<div class="stat-tile"><span class="stat-num">'+state.grammarDone.length+' / '+GRAMMAR.length+'</span><span class="stat-label">Lecciones de gramática</span></div>'+
   '</div>';
 
@@ -2024,13 +2031,14 @@ function viewStats(){
   THEMES.forEach(function(th){
     var g=groups[th];
     if(!g || !g.total) return;
-    var pct=Math.round((g.learned/g.total)*100);
-    html+='<div class="tp-row"><span class="tp-name">'+(TH_ICON[th]||'')+' '+escapeHtml(th)+'</span><div class="tp-track"><div class="tp-fill" style="width:'+pct+'%"></div></div><span class="tp-count">'+g.learned+'/'+g.total+'</span></div>';
+    var pct=Math.round((g.learned/g.total)*100), pctL=Math.round((g.learning/g.total)*100);
+    html+='<div class="tp-row"><span class="tp-name">'+(TH_ICON[th]||'')+' '+escapeHtml(th)+'</span><div class="tp-track"><div class="tp-fill" style="width:'+pct+'%"></div><div class="tp-learn" style="width:'+pctL+'%"></div></div><span class="tp-count">'+g.learned+'/'+g.total+'</span></div>';
   });
   html+='</div>';
+  html+='<p class="session-desc" style="margin-top:10px">Barre pleine : mots <b>retenus</b>. Barre claire : mots <b>en cours d\'apprentissage</b> (déjà vus, pas encore solides). Un mot devient « retenu » après 4 réussites espacées dans le temps (à 1, 2 puis 4 jours d\'écart) : le compteur de mots retenus ne démarre donc qu\'au bout d\'environ une semaine de pratique régulière.</p>';
 
   html+='<p class="section-label">Progresión de nivel</p>';
-  html+='<div class="prog-track" style="margin-bottom:6px"><div class="prog-fill" style="width:'+p.pct+'%"></div></div>';
+  html+='<div class="prog-track stack" style="margin-bottom:6px"><div class="prog-fill" style="width:'+p.pct+'%"></div><div class="prog-learn" style="width:'+p.pctLearning+'%"></div></div>';
   html+='<p style="font-size:.8rem;color:var(--ink-soft);margin:0">Nivel '+p.lvl+' ('+LEVEL_NAME[p.lvl]+') — '+p.learned+' / '+p.total+' mots retenus. '+
     (p.remaining
       ? ("Encore "+motsLabel(p.remaining)+" pour "+(p.isMax?"boucler le C2.":("passer en "+LEVELS[lvlIdx+1]+".")))
